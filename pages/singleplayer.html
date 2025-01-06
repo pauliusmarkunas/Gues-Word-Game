@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Singleplayer Mode</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+  <body class="bg-dark text-white">
+    <div class="container text-center my-5">
+      <h1 class="display-5 fw-bold">Singleplayer Mode</h1>
+      <p class="lead">Guess the word before time runs out!</p>
+      <div id="game-area" class="my-4">
+        <p id="description" class="text-warning">
+          Word Description: Loading...
+        </p>
+        <p id="word-display" class="fs-3">____</p>
+        <div id="letters" class="mt-3">
+          <span>A</span>
+          <span>B</span>
+        </div>
+        <div class="mt-3">
+          <h4>Use keybord to guess letter</h4>
+        </div>
+        <div class="mt-4">
+          <p>Hearts: <span id="hearts">❤️❤️❤️❤️❤️❤️❤️</span></p>
+          <p>
+            Time Left: <span id="timer" class="text-danger">60</span> seconds
+          </p>
+        </div>
+        <div class="d-grid gap-2 w-50 mx-auto mt-3">
+          <button id="power1" class="btn btn-info">
+            Use Power: Reveal Letter
+          </button>
+          <button id="power2" class="btn btn-warning">
+            Use Power: Free Guess
+          </button>
+        </div>
+      </div>
+      <!-- Win State -->
+      <div id="win-container" class="my-4 d-none">
+        <h2 id="win-msg" class="text-success">🎉 You Win! 🎉</h2>
+        <p class="lead">Congratulations on completing the level!</p>
+        <div class="d-grid gap-2 w-50 mx-auto mt-3">
+          <button id="next-level" class="btn btn-success">Next Level</button>
+          <a href="../index.html" class="btn btn-secondary">Back to Menu</a>
+        </div>
+      </div>
+
+      <!-- Time's Up State -->
+      <div id="timeup-container" class="my-4 d-none">
+        <h2 id="game-over-msg" class="text-danger">⏰ Time's Up! ⏰</h2>
+        <p class="lead">Better luck next time!</p>
+        <div class="d-grid gap-2 w-50 mx-auto mt-3">
+          <button id="play-again" class="btn btn-primary">Play Again</button>
+          <a href="../index.html" class="btn btn-secondary">Back to Menu</a>
+        </div>
+      </div>
+
+      <!-- Back to Menu Button -->
+      <a href="../index.html" class="btn btn-secondary mt-4">Back to Menu</a>
+    </div>
+    <script src="../modules/singleplayer.js" type="module" defer></script>
+    <script src="../modules/gameUtils.js" type="module" defer></script>
+  </body>
+</html>
