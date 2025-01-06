@@ -14,15 +14,15 @@
     <div class="container text-center my-5">
       <h1 class="display-5 fw-bold">2 Players Mode</h1>
       <p class="lead">Challenge your friend and guess the word!</p>
-      <div id="game-setup" class="my-4 d-none">
-        <p class="text-warning">Player 1, enter your word:</p>
+      <div id="game-setup" class="my-4">
+        <p id="p1-setup-msg" class="text-warning">Player 1, enter your word:</p>
         <input
           type="password"
           id="player1-word"
           class="form-control w-50 mx-auto mb-3"
           placeholder="Enter word"
         />
-        <p class="text-warning">Player 2, enter your word:</p>
+        <p id="p2-setup-msg" class="text-warning">Player 2, enter your word:</p>
         <input
           type="password"
           id="player2-word"
@@ -31,7 +31,7 @@
         />
         <button id="start-game" class="btn btn-success mt-2">Start Game</button>
       </div>
-      <div id="game-area" class="mt-5">
+      <div id="game-area" class="mt-5 d-none">
         <p id="description" class="text-warning">
           Word Description: Loading...
         </p>

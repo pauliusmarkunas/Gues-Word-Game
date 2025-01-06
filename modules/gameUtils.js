@@ -1,7 +1,7 @@
 export function getLevelsInfo() {
   // seconds, heart count, word difficulty(1-5), length(3-12),
   const levelsInfo = [
-    [10, 10, 3, 3],
+    [100, 10, 3, 3],
     [90, 9, 3, 4],
     [80, 8, 1, 5],
     [70, 7, 2, 6],
@@ -17,36 +17,6 @@ export function changeScreen(hideElSelector, showElSelector) {
   const show = document.querySelector(showElSelector);
   hide.classList.add("d-none");
   show.classList.remove("d-none");
-}
-
-// HELPER FUNCTIONS
-export async function generateWord(levelIndex, levelsInfoArr) {
-  const selectedLevelStats = levelsInfoArr[levelIndex]; // Get stats for selected level
-
-  try {
-    // Call backend to generate word
-    const response = await fetch("http://localhost:3000/generate-word", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        levelStats: selectedLevelStats,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Error: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-
-    // loading word and description to screen
-    loadWordAndDescription(data);
-    return data;
-  } catch (error) {
-    console.error("Error generating word:", error);
-  }
 }
 
 export function constructPlayerObject(levelArr) {
@@ -189,13 +159,6 @@ export function keyPressEventLogic(
 }
 
 // HELPER FUNCTIONS
-async function loadWordAndDescription(dataPromise) {
-  const wordAndDescription = await dataPromise;
-  const word = document.getElementById("word-display");
-  const description = document.getElementById("description");
-  word.textContent = "_".repeat(wordAndDescription.word.length);
-  description.textContent = wordAndDescription.description;
-}
 
 function loadWinState(message, timer, level, levelsInfo) {
   clearInterval(timer);
@@ -203,7 +166,7 @@ function loadWinState(message, timer, level, levelsInfo) {
   if (level !== levelsInfo.length - 1) {
     localStorage.setItem("level", `${++level}`);
   } else {
-    localStorage.removeIte("level");
+    localStorage.removeItem("level");
     const nextLvlBtn = document.querySelector("#next-level");
     nextLvlBtn.textContent = "Play again";
     message = `🎉 You Completed ALL ${level + 1} levels! 🎉`;

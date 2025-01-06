@@ -21,7 +21,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 window.addEventListener("load", async () => {
-  const wordAndDescription = await GameUtils.generateWord(level, levelsInfo);
+  const wordAndDescription = await generateWord(level, levelsInfo);
   playerStats.word = wordAndDescription.word.toUpperCase();
   playerStats.wordLeft = wordAndDescription.word.toUpperCase();
   console.log(wordAndDescription);
@@ -49,4 +49,40 @@ document.addEventListener("click", (e) => {
     GameUtils.powerRevealLetter(playerStats, timer, level, levelsInfo);
 });
 
-// log
+// HELPER FUNCTIONS -----------------------------------------------
+async function generateWord(levelIndex, levelsInfoArr) {
+  const selectedLevelStats = levelsInfoArr[levelIndex]; // Get stats for selected level
+
+  try {
+    // Call backend to generate word
+    const response = await fetch("http://localhost:3000/generate-word", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        levelStats: selectedLevelStats,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    // loading word and description to screen
+    loadWordAndDescription(data);
+    return data;
+  } catch (error) {
+    console.error("Error generating word:", error);
+  }
+}
+
+async function loadWordAndDescription(dataPromise) {
+  const wordAndDescription = await dataPromise;
+  const word = document.getElementById("word-display");
+  const description = document.getElementById("description");
+  word.textContent = "_".repeat(wordAndDescription.word.length);
+  description.textContent = wordAndDescription.description;
+}
