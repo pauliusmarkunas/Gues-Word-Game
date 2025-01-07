@@ -1,3 +1,8 @@
 #word-display {
   letter-spacing: 10px;
 }
+
+.custom-spinner {
+  width: 80px;
+  height: 80px;
+}

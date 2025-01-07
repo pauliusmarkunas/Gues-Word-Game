@@ -26,11 +26,15 @@ document.addEventListener("click", async (e) => {
 
   if (e.target === startGameBtn) {
     const validateWords = await validateWord();
-    if (validateWords !== "player 1" && validateWords !== "player 2") {
+    if (
+      validateWords !== "player 1" &&
+      validateWords !== "player 2" &&
+      validateWords !== "player 2 and player 1, "
+    ) {
       const descriptions = await generateDescriptions();
       GameUtils.changeScreen("#game-setup", "#game-area");
     } else {
-      GameUtils.loadTempMsg(`${validateWord} word is not valid`);
+      GameUtils.loadTempMsg(`${validateWords} word is not valid`);
     }
   }
 });
@@ -75,12 +79,11 @@ function assignWordsToObject() {
 
   p1Stats.word = word4player1;
   p2Stats.word = word4player2;
-  console.log(p1Stats, p2Stats);
 }
 
-// LOGIC IS NOT COMPLETE IF BOTH WORDS ARE WRONG, BUT IT WORKS.
-// FIX IT
+// I think the issue is what fetch automatically trows error, when it fails to fetch data. I need to manage those cases.
 async function validateWord() {
+  GameUtils.changeScreen("#game-setup", "#loading");
   try {
     const p1response = await fetch(
       `https://api.dictionaryapi.dev/api/v2/entries/en/${p1Stats.word}`
@@ -88,21 +91,26 @@ async function validateWord() {
     const p2response = await fetch(
       `https://api.dictionaryapi.dev/api/v2/entries/en/${p2Stats.word}`
     );
-    const p1data = await p1response.json();
-    const p2data = await p2response.json();
-    // opposite validation because player2 created word for player 1 and opposite
-    if (p1data.title === "No Definitions Found") return "player 2";
-    if (p2data.title === "No Definitions Found") return "player 1";
     if (!p1response.ok) {
       throw new Error(`Error: ${p1response.statusText}`);
     }
     if (!p2response.ok) {
       throw new Error(`Error: ${p2response.statusText}`);
     }
+    const p1data = await p1response.json();
+    const p2data = await p2response.json();
+
+    if (
+      p1data.title === "No Definitions Found" &&
+      p2data.title === "No Definitions Found"
+    )
+      throw "player 2 and player 1, ";
+    if (p1data.title === "No Definitions Found") throw "player 2";
+    if (p2data.title === "No Definitions Found") throw "player 1";
     return true;
-  } catch {
-    // could add temp msg there
-    console.error("Error validating word:", Error);
-    return false;
+  } catch (error) {
+    GameUtils.changeScreen("#loading", "#game-setup");
+    console.log(error.message);
+    return error.message;
   }
 }
