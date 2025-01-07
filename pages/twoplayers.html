@@ -31,19 +31,25 @@
         />
         <button id="start-game" class="btn btn-success mt-2">Start Game</button>
       </div>
-      <div id="game-area" class="mt-5 d-none">
+      <div id="game-area" class="my-4 d-none">
         <p id="description" class="text-warning">
           Word Description: Loading...
         </p>
-        <p id="word-display" class="fs-3">_ _ _ _</p>
-        <p>Player Turn: <span id="player-turn">Player 1</span></p>
+        <p id="word-display" class="fs-3">____</p>
+        <div id="letters" class="mt-3">
+          <span>A</span>
+          <span>B</span>
+        </div>
         <div class="mt-3">
-          <input
-            type="text"
-            id="guess-input"
-            class="form-control w-50 mx-auto"
-            placeholder="Enter your guess"
-          />
+          <h4>Use keybord to guess letter</h4>
+        </div>
+        <div class="mt-4">
+          <p>Hearts: <span id="hearts">❤️❤️❤️❤️❤️❤️❤️</span></p>
+          <p>
+            Time Left: <span id="timer" class="text-danger">60</span> seconds
+          </p>
+        </div>
+        <div class="d-grid gap-2 w-50 mx-auto mt-3">
           <button id="submit-guess" class="btn btn-success mt-2">Submit</button>
         </div>
         <div class="mt-4">

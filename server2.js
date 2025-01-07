@@ -35,7 +35,7 @@ app.post("/generate-description", async (req, res) => {
   }
 
   const prompt = `
-  Provide concise descriptions for a word-guessing game. Each word must have a unique description that does not include the word itself. Format the output as: 'description of ${word1} | description of ${word2}'. If ${word1} or ${word2} does not exist, return 'false'.
+  Provide concise descriptions for a word-guessing game. Each word must have a unique description that does not include the word itself. Format the output as: 'description of ${word1} | description of ${word2}'.
   `;
 
   try {

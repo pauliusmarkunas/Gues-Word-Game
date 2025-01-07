@@ -80,18 +80,9 @@ export function powerRevealLetter(playerStats, timer, level, levelsInfo) {
 
       // if it was guessed message appears for 5 sec. declearing that
     } else {
-      const messageBox = document.createElement("div");
-      messageBox.classList.add("alert", "alert-info", "text-center");
-      messageBox.style.position = "absolute";
-      messageBox.style.top = "0";
-      messageBox.style.left = "0";
-      messageBox.style.width = "100%";
-      messageBox.style.zIndex = "999";
-      messageBox.textContent = `😥 Random letter "${playerStats.word[randomIndex]}" is already revealed 😥`;
-      document.body.appendChild(messageBox);
-      setTimeout(() => {
-        messageBox.remove();
-      }, 5000);
+      loadTempMsg(
+        `😥 Random letter "${playerStats.word[randomIndex]}" is already revealed 😥`
+      );
     }
     playerStats.isRevealLetter = false;
   }
@@ -181,6 +172,21 @@ export function loadLoseState(message, timer) {
   changeScreen("#game-area", "#timeup-container");
   const messageEl = document.querySelector("#game-over-msg");
   messageEl.textContent = message;
+}
+
+export function loadTempMsg(msg) {
+  const messageBox = document.createElement("div");
+  messageBox.classList.add("alert", "alert-info", "text-center");
+  messageBox.style.position = "absolute";
+  messageBox.style.top = "0";
+  messageBox.style.left = "0";
+  messageBox.style.width = "100%";
+  messageBox.style.zIndex = "999";
+  messageBox.textContent = msg;
+  document.body.appendChild(messageBox);
+  setTimeout(() => {
+    messageBox.remove();
+  }, 5000);
 }
 
 // update letters could be optimized easy if I only append letter, and when new game starts, only then I could remove all guessed letters
