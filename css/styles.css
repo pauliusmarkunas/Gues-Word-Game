@@ -2,6 +2,10 @@
   letter-spacing: 10px;
 }
 
+#difficulty {
+  cursor: pointer;
+}
+
 .custom-spinner {
   width: 80px;
   height: 80px;

@@ -2,22 +2,27 @@ import * as GameUtils from "./gameUtils.js";
 
 const levelsInfo = GameUtils.getLevelsInfo();
 
-if (localStorage.getItem("level42") === null) {
-  localStorage.setItem("level42", "0");
-}
+// I think it is not neccessary because null will convert to 0 witn Number class
 
-let level = Number(localStorage.getItem("level42"));
+const levelsDropdown = document.querySelector("#difficulty");
+let level = Number(levelsDropdown.options[levelsDropdown.selectedIndex].value);
+let gameActive = false;
+loadSetupMessages();
+
+levelsDropdown.addEventListener("change", () => {
+  level = Number(levelsDropdown.options[levelsDropdown.selectedIndex].value);
+  loadSetupMessages();
+});
 
 let timer;
 
 const p1Stats = GameUtils.constructPlayerObject(levelsInfo[level]);
 const p2Stats = GameUtils.constructPlayerObject(levelsInfo[level]);
 
-loadSetupMessages();
+const activePlayerEl = document.querySelector("#active-player");
+let activePlayer = p1Stats;
 
-window.addEventListener("load", () => {
-  console.log("2 players game fully loaded");
-});
+// SETUP PART
 
 // EVENT LISTENERS
 document.addEventListener("click", async (e) => {
@@ -25,21 +30,77 @@ document.addEventListener("click", async (e) => {
   assignWordsToObject();
 
   if (e.target === startGameBtn) {
+    console.log(level);
     const validateWords = await validateWord();
     if (
       validateWords !== "player 1" &&
       validateWords !== "player 2" &&
-      validateWords !== "player 2 and player 1, "
+      validateWords !== "player 2 and player 1,"
     ) {
-      const descriptions = await generateDescriptions();
-      GameUtils.changeScreen("#game-setup", "#game-area");
+      let description = await generateDescriptions();
+      p1Stats.description = description.description1;
+      p2Stats.description = description.description2;
+      console.log(p1Stats, p2Stats);
+      GameUtils.changeScreen("#loading", "#game-area");
+
+      loadPlayer(activePlayer);
+      activePlayerEl.textContent = `It's the ${
+        activePlayer === p1Stats ? "1st" : "2nd"
+      } player's turn`;
+      gameActive = true;
     } else {
       GameUtils.loadTempMsg(`${validateWords} word is not valid`);
     }
   }
 });
 
-// LOCAL HELPER FUNCTION
+// GAMEPLAY PART
+document.addEventListener("keydown", (e) => {
+  if (gameActive) {
+    GameUtils.keyPressEventLogic(e.key, activePlayer, timer, level, levelsInfo);
+    clearInterval(timer);
+
+    activePlayerEl.textContent = `Player ${
+      activePlayer === p1Stats ? "1" : "2"
+    } has made their epic move!`;
+
+    setTimeout(() => {
+      if (activePlayer === p1Stats) {
+        activePlayer = p2Stats;
+      } else {
+        activePlayer = p1Stats;
+      }
+
+      activePlayerEl.textContent = `It's the ${
+        activePlayer === p1Stats ? "1st" : "2nd"
+      } player's turn`;
+
+      loadPlayer(activePlayer);
+    }, 3000);
+  }
+});
+
+// MAIN GAME FUCNTION
+function loadPlayer() {
+  activePlayer.updateTime();
+  activePlayer.updateHearts();
+  loadWordAndDescription(activePlayer);
+
+  timer = setInterval(() => {
+    if (activePlayer.time > 0) {
+      activePlayer.time--;
+      activePlayer.updateTime();
+    } else {
+      GameUtils.loadLoseState(
+        `⏰ Time's Up! ⏰ ${activePlayer === p1Stats ? "2" : "1"} WINS!!!`,
+        timer
+      );
+    }
+  }, 1000);
+}
+
+// LOCAL HELPER FUNCTIONS
+
 function loadSetupMessages() {
   const p1msg = document.querySelector("#p1-setup-msg");
   const p2msg = document.querySelector("#p2-setup-msg");
@@ -47,12 +108,13 @@ function loadSetupMessages() {
   p2msg.textContent = `Player 2, enter your word conaining EXACTLY ${levelsInfo[level][3]} letters:`;
 }
 
+// Add 3 times retry if !response.ok
 async function generateDescriptions() {
   try {
     const response = await fetch("http://localhost:3500/generate-description", {
       method: "POST",
       headers: {
-        "Content-Type": "application.json",
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         word1: p1Stats.word,
@@ -74,8 +136,8 @@ async function generateDescriptions() {
 function assignWordsToObject() {
   const p1Input = document.querySelector("#player1-word");
   const p2Input = document.querySelector("#player2-word");
-  const word4player1 = p2Input.value;
-  const word4player2 = p1Input.value;
+  let word4player1 = p2Input.value.toUpperCase();
+  let word4player2 = p1Input.value.toUpperCase();
 
   p1Stats.word = word4player1;
   p2Stats.word = word4player2;
@@ -91,12 +153,6 @@ async function validateWord() {
     const p2response = await fetch(
       `https://api.dictionaryapi.dev/api/v2/entries/en/${p2Stats.word}`
     );
-    if (!p1response.ok) {
-      throw new Error(`Error: ${p1response.statusText}`);
-    }
-    if (!p2response.ok) {
-      throw new Error(`Error: ${p2response.statusText}`);
-    }
     const p1data = await p1response.json();
     const p2data = await p2response.json();
 
@@ -104,13 +160,26 @@ async function validateWord() {
       p1data.title === "No Definitions Found" &&
       p2data.title === "No Definitions Found"
     )
-      throw "player 2 and player 1, ";
+      throw "player 2 and player 1,";
     if (p1data.title === "No Definitions Found") throw "player 2";
     if (p2data.title === "No Definitions Found") throw "player 1";
+    if (!p1response.ok) {
+      throw new Error(`Error: ${p1response.statusText}`);
+    }
+    if (!p2response.ok) {
+      throw new Error(`Error: ${p2response.statusText}`);
+    }
     return true;
   } catch (error) {
     GameUtils.changeScreen("#loading", "#game-setup");
-    console.log(error.message);
-    return error.message;
+    console.log(error);
+    return error;
   }
+}
+
+function loadWordAndDescription(activePlayer) {
+  const word = document.getElementById("word-display");
+  const description = document.getElementById("description");
+  word.textContent = "_".repeat(activePlayer.word.length);
+  description.textContent = activePlayer.description;
 }

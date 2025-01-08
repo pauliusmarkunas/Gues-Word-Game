@@ -18,6 +18,7 @@ app.use(cors());
 app.use(express.json());
 
 const openAIClient = new OpenAI({
+  baseURL: "https://models.inference.ai.azure.com",
   apiKey: process.env.OPENAI_API_KEY,
 });
 
@@ -35,12 +36,12 @@ app.post("/generate-description", async (req, res) => {
   }
 
   const prompt = `
-  Provide concise descriptions for a word-guessing game. Each word must have a unique description that does not include the word itself. Format the output as: 'description of ${word1} | description of ${word2}'.
+  Create short descriptions of "${word1}" and "${word2}".  Format the output as: "description of ${word1} | description of ${word2}". (Each description CAN NOT include the word itself and any other irrelevant symbols.)
   `;
 
   try {
     const chatCompletion = await openAIClient.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
       max_tokens: 150,
     });

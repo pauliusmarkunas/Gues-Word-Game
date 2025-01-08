@@ -12,9 +12,21 @@
   </head>
   <body class="bg-dark text-white">
     <div class="container text-center my-5">
-      <h1 class="display-5 fw-bold">2 Players Mode</h1>
+      <h1 id="active-player" class="display-5 fw-bold">2 Players Mode</h1>
       <p class="lead">Challenge your friend and guess the word!</p>
       <div id="game-setup" class="my-4">
+        <p id="difficulty-msg" class="text-warning">
+          Select Game Difficulty First:
+        </p>
+        <select id="difficulty" class="form-control w-50 mx-auto mb-3">
+          <option value="0" selected>0</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+        </select>
         <p id="p1-setup-msg" class="text-warning">Player 1, enter your word:</p>
         <input
           type="password"
@@ -31,6 +43,7 @@
         />
         <button id="start-game" class="btn btn-success mt-2">Start Game</button>
       </div>
+
       <div id="game-area" class="my-4 d-none">
         <p id="description" class="text-warning">
           Word Description: Loading...
@@ -42,15 +55,6 @@
         </div>
         <div class="mt-3">
           <h4>Use keybord to guess letter</h4>
-        </div>
-        <div class="mt-4">
-          <p>Hearts: <span id="hearts">❤️❤️❤️❤️❤️❤️❤️</span></p>
-          <p>
-            Time Left: <span id="timer" class="text-danger">60</span> seconds
-          </p>
-        </div>
-        <div class="d-grid gap-2 w-50 mx-auto mt-3">
-          <button id="submit-guess" class="btn btn-success mt-2">Submit</button>
         </div>
         <div class="mt-4">
           <p>Hearts: <span id="hearts">❤️❤️❤️❤️❤️❤️❤️</span></p>
@@ -71,6 +75,25 @@
           <button id="power4" class="btn btn-warning">Free Guess (Self)</button>
         </div>
       </div>
+      <!-- Win State -->
+      <div id="win-container" class="my-4 d-none">
+        <h2 id="win-msg" class="text-success">🎉 You Win! 🎉</h2>
+        <p class="lead">Congratulations on completing the level!</p>
+        <div class="d-grid gap-2 w-50 mx-auto mt-3">
+          <button id="next-level" class="btn btn-success">Next Level</button>
+          <a href="../index.html" class="btn btn-secondary">Back to Menu</a>
+        </div>
+      </div>
+
+      <!-- Time's Up State -->
+      <div id="timeup-container" class="my-4 d-none">
+        <h2 id="game-over-msg" class="text-danger">⏰ Time's Up! ⏰</h2>
+        <p class="lead">Better luck next time!</p>
+        <div class="d-grid gap-2 w-50 mx-auto mt-3">
+          <button id="play-again" class="btn btn-primary">Play Again</button>
+          <a href="../index.html" class="btn btn-secondary">Back to Menu</a>
+        </div>
+      </div>
       <a href="../index.html" class="btn btn-secondary mt-4">Back to Menu</a>
     </div>
     <!-- Loading animation container -->
@@ -83,6 +106,7 @@
       </div>
       <span class="mt-3 text-warning font-weight-bold">Loading...</span>
     </div>
-    <script src="../modules/twoplayers.js" type="module"></script>
+    <script src="../modules/twoplayers.js" type="module" defer></script>
+    <script src="../modules/gameUtils.js" type="module" defer></script>
   </body>
 </html>

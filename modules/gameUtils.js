@@ -12,6 +12,15 @@ export function getLevelsInfo() {
   return levelsInfo;
 }
 
+export function getConfig() {
+  // seconds, heart count, word difficulty(1-5), length(3-12),
+  const configObject = {
+    lang: "EN",
+    music: true,
+  };
+  return configObject;
+}
+
 export function changeScreen(hideElSelector, showElSelector) {
   const hide = document.querySelector(hideElSelector);
   const show = document.querySelector(showElSelector);
@@ -136,7 +145,9 @@ export function keyPressEventLogic(
       }
     }
     hiddenWordEl.textContent = hiddenWordArr.join("");
-    playerStats.wordLeft = playerStats.wordLeft.replaceAll(normalizedKey, "");
+    playerStats.wordLeft = playerStats.wordLeft.replaceAll("");
+    // change:
+    // playerStats.wordLeft = playerStats.wordLeft.replaceAll(normalizedKey, "");
 
     if (playerStats.wordLeft === "")
       loadWinState(
