@@ -124,6 +124,7 @@ export function keyPressEventLogic(
     // normalized letter, convertion to uppercase
     const normalizedKey = pressedKey.toLocaleUpperCase();
     playerStats.addGuestLetter(normalizedKey);
+    playerStats.updateGuessedLetters();
 
     // catch if letter is not part of word, one heart is removed
     if (!playerStats.word.includes(normalizedKey)) {
@@ -145,9 +146,7 @@ export function keyPressEventLogic(
       }
     }
     hiddenWordEl.textContent = hiddenWordArr.join("");
-    playerStats.wordLeft = playerStats.wordLeft.replaceAll("");
-    // change:
-    // playerStats.wordLeft = playerStats.wordLeft.replaceAll(normalizedKey, "");
+    playerStats.wordLeft = playerStats.wordLeft.replaceAll(normalizedKey, "");
 
     if (playerStats.wordLeft === "")
       loadWinState(

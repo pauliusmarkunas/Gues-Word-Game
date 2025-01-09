@@ -32,11 +32,7 @@ document.addEventListener("click", async (e) => {
   if (e.target === startGameBtn) {
     console.log(level);
     const validateWords = await validateWord();
-    if (
-      validateWords !== "player 1" &&
-      validateWords !== "player 2" &&
-      validateWords !== "player 2 and player 1,"
-    ) {
+    if (validateWords === true) {
       let description = await generateDescriptions();
       p1Stats.description = description.description1;
       p2Stats.description = description.description2;
@@ -49,7 +45,7 @@ document.addEventListener("click", async (e) => {
       } player's turn`;
       gameActive = true;
     } else {
-      GameUtils.loadTempMsg(`${validateWords} word is not valid`);
+      GameUtils.loadTempMsg(validateWords);
     }
   }
 });
@@ -57,26 +53,38 @@ document.addEventListener("click", async (e) => {
 // GAMEPLAY PART
 document.addEventListener("keydown", (e) => {
   if (gameActive) {
-    GameUtils.keyPressEventLogic(e.key, activePlayer, timer, level, levelsInfo);
-    clearInterval(timer);
+    if (!activePlayer.guestLetters.includes(e.key.toUpperCase())) {
+      gameActive = false;
+      GameUtils.keyPressEventLogic(
+        e.key,
+        activePlayer,
+        timer,
+        level,
+        levelsInfo
+      );
+      clearInterval(timer);
 
-    activePlayerEl.textContent = `Player ${
-      activePlayer === p1Stats ? "1" : "2"
-    } has made their epic move!`;
+      activePlayerEl.textContent = `Player ${
+        activePlayer === p1Stats ? "1" : "2"
+      } has made their epic move!`;
 
-    setTimeout(() => {
-      if (activePlayer === p1Stats) {
-        activePlayer = p2Stats;
-      } else {
-        activePlayer = p1Stats;
-      }
+      setTimeout(() => {
+        if (activePlayer === p1Stats) {
+          activePlayer = p2Stats;
+        } else {
+          activePlayer = p1Stats;
+        }
 
-      activePlayerEl.textContent = `It's the ${
-        activePlayer === p1Stats ? "1st" : "2nd"
-      } player's turn`;
+        activePlayerEl.textContent = `It's the ${
+          activePlayer === p1Stats ? "1st" : "2nd"
+        } player's turn`;
 
-      loadPlayer(activePlayer);
-    }, 3000);
+        loadPlayer(activePlayer);
+        gameActive = true;
+      }, 1000);
+    } else {
+      GameUtils.loadTempMsg("This Letter is already guest");
+    }
   }
 });
 
@@ -84,6 +92,7 @@ document.addEventListener("keydown", (e) => {
 function loadPlayer() {
   activePlayer.updateTime();
   activePlayer.updateHearts();
+  activePlayer.updateGuessedLetters();
   loadWordAndDescription(activePlayer);
 
   timer = setInterval(() => {
@@ -141,6 +150,8 @@ function assignWordsToObject() {
 
   p1Stats.word = word4player1;
   p2Stats.word = word4player2;
+  p1Stats.wordLeft = word4player1;
+  p2Stats.wordLeft = word4player2;
 }
 
 // I think the issue is what fetch automatically trows error, when it fails to fetch data. I need to manage those cases.
@@ -160,9 +171,17 @@ async function validateWord() {
       p1data.title === "No Definitions Found" &&
       p2data.title === "No Definitions Found"
     )
-      throw "player 2 and player 1,";
-    if (p1data.title === "No Definitions Found") throw "player 2";
-    if (p2data.title === "No Definitions Found") throw "player 1";
+      throw "player 2 and player 1 words are incorrect";
+    if (
+      p1data.title === "No Definitions Found" ||
+      p1Stats.word.length !== levelsInfo[level][3]
+    )
+      throw "player 2 word is not valid";
+    if (
+      p2data.title === "No Definitions Found" ||
+      p2Stats.word.length !== levelsInfo[level][3]
+    )
+      throw "player 1 word is not valid";
     if (!p1response.ok) {
       throw new Error(`Error: ${p1response.statusText}`);
     }
@@ -172,8 +191,8 @@ async function validateWord() {
     return true;
   } catch (error) {
     GameUtils.changeScreen("#loading", "#game-setup");
-    console.log(error);
-    return error;
+    // console.log(`${error}, try again`);
+    return `${error}, try again`;
   }
 }
 
@@ -183,3 +202,15 @@ function loadWordAndDescription(activePlayer) {
   word.textContent = "_".repeat(activePlayer.word.length);
   description.textContent = activePlayer.description;
 }
+
+// LOG
+// loadWordAndDescription so it could be used for changing active player(word generation)
+// Bug (player change does not work as intended).
+// cehck if letter is guest first (if letter is already guest it should load a message)
+// develop powers (3left, one for singleplayer also)
+// add input event in setup to track how many letters left to add for player
+
+// DONE
+// implement length check (easy)
+// fix word validation part. prompt message if word is nor correct
+// debug main logic (change)

@@ -28,6 +28,7 @@ window.addEventListener("load", async () => {
 
   playerStats.updateTime();
   playerStats.updateHearts();
+  playerStats.updateGuessedLetters();
 
   timer = setInterval(() => {
     if (playerStats.time > 0) {

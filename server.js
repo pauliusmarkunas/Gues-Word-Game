@@ -15,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 const openAIClient = new OpenAI({
+  baseURL: "https://models.inference.ai.azure.com",
   apiKey: process.env.OPENAI_API_KEY,
 });
 
@@ -39,7 +40,7 @@ Example: exotic | Foreign; strikingly unusual or strange`;
 
   try {
     const chatCompletion = await openAIClient.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
       max_tokens: 150,
     });

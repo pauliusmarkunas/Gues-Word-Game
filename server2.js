@@ -41,7 +41,7 @@ app.post("/generate-description", async (req, res) => {
 
   try {
     const chatCompletion = await openAIClient.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
       max_tokens: 150,
     });
