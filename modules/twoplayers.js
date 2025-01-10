@@ -116,6 +116,9 @@ function loadPlayer() {
     activePlayer.color,
     "important"
   );
+
+  GameUtils.playAudio(true, "game-music2");
+
   activePlayer.updateTime();
   activePlayer.updateHearts();
   activePlayer.updateGuessedLetters();
@@ -253,6 +256,7 @@ function keyPressEventLogic(pressedKey, playerStats, playerId) {
     // catch if letter is not part of word, one heart is removed
     if (!playerStats.word.includes(normalizedKey)) {
       playerStats.heartCount--;
+      GameUtils.playAudio(false, "incorect-letter");
       playerStats.updateHearts();
       if (playerStats.heartCount <= 0) {
         loadLoseState(
@@ -264,6 +268,7 @@ function keyPressEventLogic(pressedKey, playerStats, playerId) {
     }
 
     // else part. Guessed letters are revieled in the game
+    GameUtils.playAudio(false, "correct-letter");
     const hiddenWordEl = document.querySelector("#word-display");
     const hiddenWord = hiddenWordEl.textContent;
     let hiddenWordArr = hiddenWord.split("");
