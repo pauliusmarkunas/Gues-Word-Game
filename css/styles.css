@@ -1,3 +1,7 @@
+body {
+  transition: background-color 0.3s ease-in-out;
+}
+
 #word-display {
   letter-spacing: 10px;
 }
@@ -9,4 +13,8 @@
 .custom-spinner {
   width: 80px;
   height: 80px;
+}
+
+#audio-icon {
+  caret-color: transparent;
 }

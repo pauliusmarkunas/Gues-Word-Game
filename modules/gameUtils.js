@@ -1,3 +1,17 @@
+// audio logic (for all pages)
+let audioStatus = true;
+const audio = document.getElementById("audio");
+
+document.addEventListener("click", (e) => {
+  const audioToggleEl = document.getElementById("audio-toggle");
+  if (audioToggleEl.contains(e.target)) {
+    audioStatus = !audioStatus;
+    audioStatus ? audio.play() : audio.pause();
+    audioToggleEl.children[0].classList.toggle("bi-volume-mute");
+    audioToggleEl.children[0].classList.toggle("bi-volume-up");
+  }
+});
+
 export function getLevelsInfo() {
   // seconds, heart count, word difficulty(1-5), length(3-12),
   const levelsInfo = [
@@ -10,15 +24,6 @@ export function getLevelsInfo() {
     [50, 5, 5, 12],
   ];
   return levelsInfo;
-}
-
-export function getConfig() {
-  // seconds, heart count, word difficulty(1-5), length(3-12),
-  const configObject = {
-    lang: "EN",
-    music: true,
-  };
-  return configObject;
 }
 
 export function changeScreen(hideElSelector, showElSelector) {
@@ -197,6 +202,16 @@ export function loadTempMsg(msg) {
   setTimeout(() => {
     messageBox.remove();
   }, 5000);
+}
+
+export function playAudio(isLoop, audioName) {
+  audio.src = `../assets/audio/${audioName}.mp3`;
+  audio.loop = isLoop ? true : false;
+  // audio.addEventListener("ended", () => {
+  //   audio.currentTime = 0;
+  //   audio.play();
+  // });
+  audioStatus ? audio.play() : audio.pause();
 }
 
 // update letters could be optimized easy if I only append letter, and when new game starts, only then I could remove all guessed letters
