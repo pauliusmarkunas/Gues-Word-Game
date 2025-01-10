@@ -12,7 +12,7 @@ let gameOver = false;
 
 loadSetupMessage(1);
 loadSetupMessage(2);
-GameUtils.playAudio(true, "game-music1");
+GameUtils.playAudio(true, "game-setup-music");
 
 levelsDropdown.addEventListener("change", () => {
   level = Number(levelsDropdown.options[levelsDropdown.selectedIndex].value);
@@ -52,6 +52,7 @@ document.addEventListener("click", async (e) => {
     const validateWords = await validateWord();
     if (validateWords === true) {
       let description = await generateDescriptions();
+      GameUtils.playAudio(true, "game42-music");
       p1Stats.description = description.description1;
       p2Stats.description = description.description2;
       console.log(p1Stats, p2Stats);
@@ -116,8 +117,6 @@ function loadPlayer() {
     activePlayer.color,
     "important"
   );
-
-  GameUtils.playAudio(true, "game-music2");
 
   activePlayer.updateTime();
   activePlayer.updateHearts();
@@ -256,7 +255,7 @@ function keyPressEventLogic(pressedKey, playerStats, playerId) {
     // catch if letter is not part of word, one heart is removed
     if (!playerStats.word.includes(normalizedKey)) {
       playerStats.heartCount--;
-      GameUtils.playAudio(false, "incorect-letter");
+      GameUtils.playFx("incorect-letter");
       playerStats.updateHearts();
       if (playerStats.heartCount <= 0) {
         loadLoseState(
@@ -268,7 +267,7 @@ function keyPressEventLogic(pressedKey, playerStats, playerId) {
     }
 
     // else part. Guessed letters are revieled in the game
-    GameUtils.playAudio(false, "correct-letter");
+    GameUtils.playFx("correct-letter");
     const hiddenWordEl = document.querySelector("#word-display");
     const hiddenWord = hiddenWordEl.textContent;
     let hiddenWordArr = hiddenWord.split("");
@@ -300,7 +299,7 @@ function loadWinState(message) {
 
   activePlayerEl.textContent = "Congrads!";
 
-  GameUtils.playAudio(audioStatus, false, "game-win");
+  GameUtils.playAudio(false, "game-win");
 }
 
 function loadLoseState(message, timer) {
@@ -316,7 +315,7 @@ function loadLoseState(message, timer) {
 
   activePlayerEl.textContent = "Better luck next time!";
 
-  GameUtils.playAudio(audioStatus, false, "game-over");
+  GameUtils.playAudio(false, "game-over");
 }
 
 // LOG

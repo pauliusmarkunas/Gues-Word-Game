@@ -1,6 +1,7 @@
 // audio logic (for all pages)
 let audioStatus = true;
 const audio = document.getElementById("audio");
+const audioFx = document.getElementById("audio-fx");
 
 document.addEventListener("click", (e) => {
   const audioToggleEl = document.getElementById("audio-toggle");
@@ -41,6 +42,8 @@ export function constructPlayerObject(levelArr) {
       this.guestLetters = "";
       this.isRevealLetter = true;
       this.isFreeGuess = true;
+      this.isRemoveLetter = true;
+      this.isHideLetters = true;
       this.word = "";
     }
 
@@ -73,34 +76,35 @@ export function constructPlayerObject(levelArr) {
   return new PlayerStats(levelArr);
 }
 
-export function powerRevealLetter(playerStats, timer, level, levelsInfo) {
-  // adding disabled style
-  const revealLetterBtn = document.querySelector("#power1");
-  revealLetterBtn.classList.add("disabled");
+// POWERS --------------------------------------------
+// export function powerRevealLetter(playerStats, timer, level, levelsInfo) {
+//   // adding disabled style
+//   const revealLetterBtn = document.querySelector("#power1");
+//   revealLetterBtn.classList.add("disabled");
 
-  if (playerStats.isRevealLetter) {
-    // Generates random index for which letter should be revieled
-    const randomIndex = Math.floor(Math.random() * playerStats.word.length);
+//   if (playerStats.isRevealLetter) {
+//     // Generates random index for which letter should be revieled
+//     const randomIndex = Math.floor(Math.random() * playerStats.word.length);
 
-    // if random letter was not guest yet
-    if (!playerStats.guestLetters.includes(playerStats.word[randomIndex])) {
-      keyPressEventLogic(
-        playerStats.word[randomIndex],
-        playerStats,
-        timer,
-        level,
-        levelsInfo
-      );
+//     // if random letter was not guest yet
+//     if (!playerStats.guestLetters.includes(playerStats.word[randomIndex])) {
+//       keyPressEventLogic(
+//         playerStats.word[randomIndex],
+//         playerStats,
+//         timer,
+//         level,
+//         levelsInfo
+//       );
 
-      // if it was guessed message appears for 5 sec. declearing that
-    } else {
-      loadTempMsg(
-        `😥 Random letter "${playerStats.word[randomIndex]}" is already revealed 😥`
-      );
-    }
-    playerStats.isRevealLetter = false;
-  }
-}
+//       // if it was guessed message appears for 5 sec. declearing that
+//     } else {
+//       loadTempMsg(
+//         `😥 Random letter "${playerStats.word[randomIndex]}" is already revealed 😥`
+//       );
+//     }
+//     playerStats.isRevealLetter = false;
+//   }
+// }
 
 export function powerFreeGuess(playerStats) {
   // adding disabled style
@@ -114,80 +118,80 @@ export function powerFreeGuess(playerStats) {
   }
 }
 
-export function keyPressEventLogic(
-  pressedKey,
-  playerStats,
-  timer,
-  level,
-  levelsInfo
-) {
-  // checking if press event is valid
-  if (
-    !playerStats.guestLetters.includes(pressedKey.toUpperCase()) &&
-    /^[a-zA-Z]$/.test(pressedKey)
-  ) {
-    // normalized letter, convertion to uppercase
-    const normalizedKey = pressedKey.toLocaleUpperCase();
-    playerStats.addGuestLetter(normalizedKey);
-    playerStats.updateGuessedLetters();
+// export function keyPressEventLogic(
+//   pressedKey,
+//   playerStats,
+//   timer,
+//   level,
+//   levelsInfo
+// ) {
+//   // checking if press event is valid
+//   if (
+//     !playerStats.guestLetters.includes(pressedKey.toUpperCase()) &&
+//     /^[a-zA-Z]$/.test(pressedKey)
+//   ) {
+//     // normalized letter, convertion to uppercase
+//     const normalizedKey = pressedKey.toLocaleUpperCase();
+//     playerStats.addGuestLetter(normalizedKey);
+//     playerStats.updateGuessedLetters();
 
-    // catch if letter is not part of word, one heart is removed
-    if (!playerStats.word.includes(normalizedKey)) {
-      playerStats.heartCount--;
-      playerStats.updateHearts();
-      if (playerStats.heartCount <= 0) {
-        loadLoseState("❤️No more guesses❤️", timer);
-      }
-      return;
-    }
+//     // catch if letter is not part of word, one heart is removed
+//     if (!playerStats.word.includes(normalizedKey)) {
+//       playerStats.heartCount--;
+//       playerStats.updateHearts();
+//       if (playerStats.heartCount <= 0) {
+//         loadLoseState("❤️No more guesses❤️", timer);
+//       }
+//       return;
+//     }
 
-    // else part. Guessed letters are revieled in the game
-    const hiddenWordEl = document.querySelector("#word-display");
-    const hiddenWord = hiddenWordEl.textContent;
-    let hiddenWordArr = hiddenWord.split("");
-    for (let i = 0; i < playerStats.word.length; i++) {
-      if (playerStats.word[i] === normalizedKey) {
-        hiddenWordArr[i] = normalizedKey;
-      }
-    }
-    hiddenWordEl.textContent = hiddenWordArr.join("");
-    playerStats.wordLeft = playerStats.wordLeft.replaceAll(normalizedKey, "");
+//     // else part. Guessed letters are revieled in the game
+//     const hiddenWordEl = document.querySelector("#word-display");
+//     const hiddenWord = hiddenWordEl.textContent;
+//     let hiddenWordArr = hiddenWord.split("");
+//     for (let i = 0; i < playerStats.word.length; i++) {
+//       if (playerStats.word[i] === normalizedKey) {
+//         hiddenWordArr[i] = normalizedKey;
+//       }
+//     }
+//     hiddenWordEl.textContent = hiddenWordArr.join("");
+//     playerStats.wordLeft = playerStats.wordLeft.replaceAll(normalizedKey, "");
 
-    if (playerStats.wordLeft === "")
-      loadWinState(
-        `🎉 You Completed level ${level + 1}! 🎉`,
-        timer,
-        level,
-        levelsInfo
-      );
-  }
-  playerStats.updateHearts();
-}
+//     if (playerStats.wordLeft === "")
+//       loadWinState(
+//         `🎉 You Completed level ${level + 1}! 🎉`,
+//         timer,
+//         level,
+//         levelsInfo
+//       );
+//   }
+//   playerStats.updateHearts();
+// }
 
-// HELPER FUNCTIONS
+// // HELPER FUNCTIONS
 
-function loadWinState(message, timer, level, levelsInfo) {
-  clearInterval(timer);
-  changeScreen("#game-area", "#win-container");
-  if (level !== levelsInfo.length - 1) {
-    localStorage.setItem("level", `${++level}`);
-  } else {
-    localStorage.removeItem("level");
-    const nextLvlBtn = document.querySelector("#next-level");
-    nextLvlBtn.textContent = "Play again";
-    message = `🎉 You Completed ALL ${level + 1} levels! 🎉`;
-  }
-  const winMsg = document.querySelector("#win-msg");
-  winMsg.textContent = message;
-}
+// function loadWinState(message, timer, level, levelsInfo) {
+//   clearInterval(timer);
+//   changeScreen("#game-area", "#win-container");
+//   if (level !== levelsInfo.length - 1) {
+//     localStorage.setItem("level", `${++level}`);
+//   } else {
+//     localStorage.removeItem("level");
+//     const nextLvlBtn = document.querySelector("#next-level");
+//     nextLvlBtn.textContent = "Play again";
+//     message = `🎉 You Completed ALL ${level + 1} levels! 🎉`;
+//   }
+//   const winMsg = document.querySelector("#win-msg");
+//   winMsg.textContent = message;
+// }
 
-export function loadLoseState(message, timer) {
-  clearInterval(timer);
-  localStorage.removeItem("level");
-  changeScreen("#game-area", "#timeup-container");
-  const messageEl = document.querySelector("#game-over-msg");
-  messageEl.textContent = message;
-}
+// export function loadLoseState(message, timer) {
+//   clearInterval(timer);
+//   localStorage.removeItem("level");
+//   changeScreen("#game-area", "#timeup-container");
+//   const messageEl = document.querySelector("#game-over-msg");
+//   messageEl.textContent = message;
+// }
 
 export function loadTempMsg(msg) {
   const messageBox = document.createElement("div");
@@ -207,11 +211,12 @@ export function loadTempMsg(msg) {
 export function playAudio(isLoop, audioName) {
   audio.src = `../assets/audio/${audioName}.mp3`;
   audio.loop = isLoop ? true : false;
-  // audio.addEventListener("ended", () => {
-  //   audio.currentTime = 0;
-  //   audio.play();
-  // });
   audioStatus ? audio.play() : audio.pause();
+}
+
+export function playFx(fxName) {
+  audioFx.src = `../assets/audio/${fxName}.mp3`;
+  audioStatus ? audioFx.play() : audioFx.pause();
 }
 
 // update letters could be optimized easy if I only append letter, and when new game starts, only then I could remove all guessed letters
