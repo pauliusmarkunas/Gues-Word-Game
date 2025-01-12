@@ -178,7 +178,7 @@ function loadPlayer() {
       activePlayer.time--;
       activePlayer.updateTime();
     } else {
-      GameUtils.loadLoseState(
+      loadLoseState(
         `⏰ Time's Up! Player ${
           activePlayer === p1Stats ? "2" : "1"
         } WINS!!! ⏰`,
@@ -346,7 +346,7 @@ function keyPressEventLogic(pressedKey, playerId) {
     }
     hiddenWordEl.textContent = hiddenWordArr.join("");
     activePlayer.wordLeft = activePlayer.wordLeft.replaceAll(normalizedKey, "");
-
+    console.log(activePlayer.wordsLeft);
     if (activePlayer.wordLeft === "")
       loadWinState(`🎉 Player ${playerId} Wins! 🎉`);
   }

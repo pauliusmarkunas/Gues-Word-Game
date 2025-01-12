@@ -1,15 +1,16 @@
 // audio logic (for all pages)
-let audioStatus = true;
+let audioStatus = localStorage.getItem("audioStatus") === "true" ? true : false;
 const audio = document.getElementById("audio");
 const audioFx = document.getElementById("audio-fx");
 
-document.addEventListener("click", (e) => {
+document.addEventListener("click", async (e) => {
   const audioToggleEl = document.getElementById("audio-toggle");
   if (audioToggleEl.contains(e.target)) {
     audioStatus = !audioStatus;
+    localStorage.setItem("audioStatus", audioStatus);
     audioStatus ? audio.play() : audio.pause();
-    audioToggleEl.children[0].classList.toggle("bi-volume-mute");
-    audioToggleEl.children[0].classList.toggle("bi-volume-up");
+    audioToggleEl.children[0].classList.toggle("bi-volume-mute", !audioStatus);
+    audioToggleEl.children[0].classList.toggle("bi-volume-up", audioStatus);
   }
 });
 
