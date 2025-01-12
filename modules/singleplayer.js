@@ -28,7 +28,9 @@ const playerStats = GameUtils.constructPlayerObject(levelsInfo[level]);
 
 // EVENT LISTERNERS
 document.addEventListener("keydown", (e) => {
-  keyPressEventLogic(e.key, playerStats, timer, level, levelsInfo);
+  if (!playerStats.guestLetters.includes(e.key.toUpperCase()))
+    keyPressEventLogic(e.key, playerStats, timer, level, levelsInfo);
+  else GameUtils.loadTempMsg("This Letter is already guest");
 });
 
 window.addEventListener("load", async () => {
@@ -60,6 +62,10 @@ document.addEventListener("click", (e) => {
   if (e.target === tryAgainBtn || e.target === nextLevelBtn) location.reload();
   if (e.target === revealLetterBtn) {
     powerRevealLetter();
+    GameUtils.playFx("superpower");
+  }
+  if (e.target === freeGuessBtn) {
+    powerFreeGuess();
     GameUtils.playFx("superpower");
   }
 });
@@ -117,6 +123,12 @@ function keyPressEventLogic(pressedKey) {
     if (!playerStats.word.includes(normalizedKey)) {
       playerStats.heartCount--;
       GameUtils.playFx("incorect-letter");
+      if (playerStats.isFreeGuessActive) {
+        // compensation
+        playerStats.heartCount++;
+        GameUtils.loadTempMsg(` ✨Free Guess was activated! ✨`, 5);
+        playerStats.isFreeGuessActive = false;
+      }
       playerStats.updateHearts();
       if (playerStats.heartCount <= 0) {
         loadLoseState("❤️No more guesses❤️");
@@ -126,6 +138,10 @@ function keyPressEventLogic(pressedKey) {
 
     // else part. Guessed letters are revieled in the game
     GameUtils.playFx("correct-letter");
+    if (playerStats.isFreeGuessActive) {
+      GameUtils.loadTempMsg(` ✨Free Guess was activated! ✨`, 5);
+      playerStats.isFreeGuessActive = false;
+    }
     const hiddenWordEl = document.querySelector("#word-display");
     const hiddenWord = hiddenWordEl.textContent;
     let hiddenWordArr = hiddenWord.split("");
@@ -184,7 +200,9 @@ function powerRevealLetter() {
     // if random letter was not guest yet
     if (!playerStats.guestLetters.includes(playerStats.word[randomIndex])) {
       keyPressEventLogic(playerStats.word[randomIndex]);
-
+      GameUtils.loadTempMsg(
+        `✨ Random letter "${playerStats.word[randomIndex]}" is revealed ✨`
+      );
       // if it was guessed message appears for 5 sec. declearing that
     } else {
       GameUtils.loadTempMsg(
@@ -192,5 +210,17 @@ function powerRevealLetter() {
       );
     }
     playerStats.isRevealLetter = false;
+  }
+}
+
+function powerFreeGuess() {
+  // adding disabled style
+  const freeGuessBtn = document.querySelector("#power2");
+  freeGuessBtn.classList.add("disabled");
+
+  if (playerStats.isFreeGuess) {
+    playerStats.isFreeGuessActive = true;
+
+    playerStats.isFreeGuess = false;
   }
 }

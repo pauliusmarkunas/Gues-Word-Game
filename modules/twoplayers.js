@@ -22,12 +22,16 @@ levelsDropdown.addEventListener("change", () => {
 
 let timer;
 
+// powers
+const powers = [];
+for (let i = 1; i <= 4; i++) {
+  powers.push(document.getElementById(`power${i}`));
+}
+
 const p1Stats = GameUtils.constructPlayerObject(levelsInfo[level]);
 const p2Stats = GameUtils.constructPlayerObject(levelsInfo[level]);
 p1Stats.id = 1;
 p2Stats.id = 2;
-p1Stats.color = "#33454B";
-p2Stats.color = "#813C46";
 
 const activePlayerEl = document.querySelector("#active-player");
 let activePlayer = p1Stats;
@@ -51,6 +55,11 @@ document.addEventListener("click", async (e) => {
     console.log(level);
     const validateWords = await validateWord();
     if (validateWords === true) {
+      p1Stats.color = document.getElementById("player1Color").value;
+      p2Stats.color = document.getElementById("player2Color").value;
+      console.log(p1Stats.color);
+      console.log(p2Stats.color);
+
       let description = await generateDescriptions();
       GameUtils.playAudio(true, "game42-music");
       p1Stats.description = description.description1;
@@ -74,6 +83,36 @@ document.addEventListener("click", async (e) => {
   if (e.target === playAgainWin || e.target === playAgainLose) {
     location.reload();
   }
+
+  // Hide Letters
+  if (e.target === powers[0]) {
+    powers[0].classList.add("disabled");
+    activePlayer.isHideLettersActive = true;
+    activePlayer.isHideLetters = false;
+  }
+
+  // Remove Letter
+  if (e.target === powers[1]) {
+    powers[1].classList.add("disabled");
+    powerRemoveLetter(activePlayer);
+  }
+
+  // Reveal Letter
+  if (e.target === powers[2]) {
+    powers[2].classList.add("disabled");
+    powerRevealLetter();
+  }
+
+  // Free guess
+  if (e.target === powers[3]) {
+    powers[3].classList.add("disabled");
+
+    if (activePlayer.isFreeGuess) {
+      activePlayer.isFreeGuessActive = true;
+
+      activePlayer.isFreeGuess = false;
+    }
+  }
 });
 
 // GAMEPLAY PART
@@ -81,7 +120,7 @@ document.addEventListener("keydown", (e) => {
   if (gameActive) {
     if (!activePlayer.guestLetters.includes(e.key.toUpperCase())) {
       gameActive = false;
-      keyPressEventLogic(e.key, activePlayer, activePlayer.id);
+      keyPressEventLogic(e.key, activePlayer.id);
       clearInterval(timer);
 
       if (!gameOver) {
@@ -104,9 +143,7 @@ document.addEventListener("keydown", (e) => {
           gameActive = true;
         }, 2000);
       }
-    } else {
-      GameUtils.loadTempMsg("This Letter is already guest");
-    }
+    } else GameUtils.loadTempMsg("This Letter is already guest");
   }
 });
 
@@ -117,6 +154,19 @@ function loadPlayer() {
     activePlayer.color,
     "important"
   );
+
+  !activePlayer.isRemoveLetter
+    ? powers[0].classList.add("disabled")
+    : powers[0].classList.remove("disabled");
+  !activePlayer.isHideLetters
+    ? powers[1].classList.add("disabled")
+    : powers[1].classList.remove("disabled");
+  !activePlayer.isRevealLetter
+    ? powers[2].classList.add("disabled")
+    : powers[2].classList.remove("disabled");
+  !activePlayer.isFreeGuess
+    ? powers[3].classList.add("disabled")
+    : powers[3].classList.remove("disabled");
 
   activePlayer.updateTime();
   activePlayer.updateHearts();
@@ -237,27 +287,41 @@ function loadWordAndDescription(activePlayer) {
       ? activePlayer.word[i]
       : "_";
   }
-  word.textContent = templateArr.join("");
+  if (activePlayer === p1Stats && p2Stats.isHideLettersActive) {
+    word.textContent = "_".repeat(activePlayer.word.length);
+    p2Stats.isHideLettersActive = false;
+    GameUtils.loadTempMsg(`✨ Opponent obstructed visibility ✨`);
+  } else if (activePlayer === p2Stats && p1Stats.isHideLettersActive) {
+    word.textContent = "_".repeat(activePlayer.word.length);
+    p1Stats.isHideLettersActive = false;
+    GameUtils.loadTempMsg(`✨ Opponent obstructed visibility ✨`);
+  } else word.textContent = templateArr.join("");
   description.textContent = activePlayer.description;
 }
 
-function keyPressEventLogic(pressedKey, playerStats, playerId) {
+function keyPressEventLogic(pressedKey, playerId) {
   // checking if press event is valid
   if (
-    !playerStats.guestLetters.includes(pressedKey.toUpperCase()) &&
+    !activePlayer.guestLetters.includes(pressedKey.toUpperCase()) &&
     /^[a-zA-Z]$/.test(pressedKey)
   ) {
     // normalized letter, convertion to uppercase
     const normalizedKey = pressedKey.toLocaleUpperCase();
-    playerStats.addGuestLetter(normalizedKey);
-    playerStats.updateGuessedLetters();
+    activePlayer.addGuestLetter(normalizedKey);
+    activePlayer.updateGuessedLetters();
 
     // catch if letter is not part of word, one heart is removed
-    if (!playerStats.word.includes(normalizedKey)) {
-      playerStats.heartCount--;
+    if (!activePlayer.word.includes(normalizedKey)) {
+      activePlayer.heartCount--;
       GameUtils.playFx("incorect-letter");
-      playerStats.updateHearts();
-      if (playerStats.heartCount <= 0) {
+      if (activePlayer.isFreeGuessActive) {
+        // compensation
+        activePlayer.heartCount++;
+        GameUtils.loadTempMsg(` ✨Free Guess was activated! ✨`, 5);
+        activePlayer.isFreeGuessActive = false;
+      }
+      activePlayer.updateHearts();
+      if (activePlayer.heartCount <= 0) {
         loadLoseState(
           `❤️No more guesses, player ${playerId} lost the game❤️`,
           timer
@@ -268,21 +332,25 @@ function keyPressEventLogic(pressedKey, playerStats, playerId) {
 
     // else part. Guessed letters are revieled in the game
     GameUtils.playFx("correct-letter");
+    if (activePlayer.isFreeGuessActive) {
+      GameUtils.loadTempMsg(` ✨Free Guess was activated! ✨`, 5);
+      activePlayer.isFreeGuessActive = false;
+    }
     const hiddenWordEl = document.querySelector("#word-display");
     const hiddenWord = hiddenWordEl.textContent;
     let hiddenWordArr = hiddenWord.split("");
-    for (let i = 0; i < playerStats.word.length; i++) {
-      if (playerStats.word[i] === normalizedKey) {
+    for (let i = 0; i < activePlayer.word.length; i++) {
+      if (activePlayer.word[i] === normalizedKey) {
         hiddenWordArr[i] = normalizedKey;
       }
     }
     hiddenWordEl.textContent = hiddenWordArr.join("");
-    playerStats.wordLeft = playerStats.wordLeft.replaceAll(normalizedKey, "");
+    activePlayer.wordLeft = activePlayer.wordLeft.replaceAll(normalizedKey, "");
 
-    if (playerStats.wordLeft === "")
+    if (activePlayer.wordLeft === "")
       loadWinState(`🎉 Player ${playerId} Wins! 🎉`);
   }
-  playerStats.updateHearts();
+  activePlayer.updateHearts();
 }
 
 // HELPER FUNCTIONS
@@ -318,11 +386,51 @@ function loadLoseState(message, timer) {
   GameUtils.playAudio(false, "game-over");
 }
 
-// LOG
-// develop powers (3left, one for singleplayer also)
-// implement music logic (add local storage (or config json file))
+// POWER FUNCTIONS
+function powerRevealLetter() {
+  if (activePlayer.isRevealLetter) {
+    // Generates random index for which letter should be revieled
+    const randomIndex = Math.floor(Math.random() * activePlayer.word.length);
+
+    // if random letter was not guest yet
+    if (!activePlayer.guestLetters.includes(activePlayer.word[randomIndex])) {
+      keyPressEventLogic(activePlayer.word[randomIndex], activePlayer.playerId);
+      GameUtils.loadTempMsg(
+        `✨ Random letter "${activePlayer.word[randomIndex]}" is revealed ✨`
+      );
+      // if it was guessed message appears for 5 sec. declearing that
+    } else {
+      GameUtils.loadTempMsg(
+        `😥 Random letter "${activePlayer.word[randomIndex]}" is already revealed 😥`
+      );
+    }
+    activePlayer.isRevealLetter = false;
+  }
+}
+
+function powerRemoveLetter() {
+  const player = activePlayer === p1Stats ? p2Stats : p1Stats;
+  if (player.guestLetters.length > 0) {
+    const randomLetterIndex = Math.floor(
+      Math.random() * player.guestLetters.length
+    );
+    const removedLetter = player.guestLetters
+      .split("")
+      .splice(randomLetterIndex, 1)
+      .join("");
+    GameUtils.loadTempMsg(`✨ Removed ${removedLetter} ✨`);
+    activePlayer.isRemoveLetter = false;
+  } else
+    GameUtils.loadTempMsg("⛔ opponent has not guessed any letters yet ⛔");
+}
+
+// LOG (BUGS)
+// implement music logic (config json file)
+// when using powers game does not end (win state)
 
 // DONE
+// power free gues (make so when player press revieled letter power stays on)
+// develop powers (3left, one for singleplayer also)
 // separate turns (change background color)
 // fix gameover and game win states (also disable interaction after)
 // add input event in setup to track how many letters left to add for player

@@ -42,8 +42,10 @@ export function constructPlayerObject(levelArr) {
       this.guestLetters = "";
       this.isRevealLetter = true;
       this.isFreeGuess = true;
+      this.isFreeGuessActive = false;
       this.isRemoveLetter = true;
       this.isHideLetters = true;
+      this.isHideLettersActive = false;
       this.word = "";
     }
 
@@ -106,17 +108,17 @@ export function constructPlayerObject(levelArr) {
 //   }
 // }
 
-export function powerFreeGuess(playerStats) {
-  // adding disabled style
-  const freeGuessBtn = document.querySelector("#power2");
-  freeGuessBtn.classList.add("disabled");
+// export function powerFreeGuess(playerStats) {
+//   // adding disabled style
+//   const freeGuessBtn = document.querySelector("#power2");
+//   freeGuessBtn.classList.add("disabled");
 
-  if (playerStats.isRevealLetter) {
-    // I think I will need async function to wait for kwypress
+//   if (playerStats.isRevealLetter) {
+//     // I think I will need async function to wait for kwypress
 
-    playerStats.isRevealLetter = false;
-  }
-}
+//     playerStats.isRevealLetter = false;
+//   }
+// }
 
 // export function keyPressEventLogic(
 //   pressedKey,
@@ -193,7 +195,7 @@ export function powerFreeGuess(playerStats) {
 //   messageEl.textContent = message;
 // }
 
-export function loadTempMsg(msg) {
+export function loadTempMsg(msg, time = 3) {
   const messageBox = document.createElement("div");
   messageBox.classList.add("alert", "alert-info", "text-center");
   messageBox.style.position = "absolute";
@@ -205,7 +207,7 @@ export function loadTempMsg(msg) {
   document.body.appendChild(messageBox);
   setTimeout(() => {
     messageBox.remove();
-  }, 5000);
+  }, time * 1000);
 }
 
 export function playAudio(isLoop, audioName) {
