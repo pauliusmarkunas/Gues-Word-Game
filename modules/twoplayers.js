@@ -57,8 +57,6 @@ document.addEventListener("click", async (e) => {
     if (validateWords === true) {
       p1Stats.color = document.getElementById("player1Color").value;
       p2Stats.color = document.getElementById("player2Color").value;
-      console.log(p1Stats.color);
-      console.log(p2Stats.color);
 
       let description = await generateDescriptions();
       GameUtils.playAudio(true, "game42-music");
@@ -287,15 +285,9 @@ function loadWordAndDescription(activePlayer) {
       ? activePlayer.word[i]
       : "_";
   }
-  if (activePlayer === p1Stats && p2Stats.isHideLettersActive) {
-    word.textContent = "_".repeat(activePlayer.word.length);
-    p2Stats.isHideLettersActive = false;
-    GameUtils.loadTempMsg(`✨ Opponent obstructed visibility ✨`);
-  } else if (activePlayer === p2Stats && p1Stats.isHideLettersActive) {
-    word.textContent = "_".repeat(activePlayer.word.length);
-    p1Stats.isHideLettersActive = false;
-    GameUtils.loadTempMsg(`✨ Opponent obstructed visibility ✨`);
-  } else word.textContent = templateArr.join("");
+  if (p1Stats.isHideLettersActive || p2Stats.isHideLettersActive)
+    powerHideLetters(word);
+  else word.textContent = templateArr.join("");
   description.textContent = activePlayer.description;
 }
 
@@ -391,17 +383,19 @@ function powerRevealLetter() {
   if (activePlayer.isRevealLetter) {
     // Generates random index for which letter should be revieled
     const randomIndex = Math.floor(Math.random() * activePlayer.word.length);
+    const normalizedLetter = activePlayer.word[randomIndex].toUpperCase();
+    console.log(normalizedLetter);
 
     // if random letter was not guest yet
-    if (!activePlayer.guestLetters.includes(activePlayer.word[randomIndex])) {
-      keyPressEventLogic(activePlayer.word[randomIndex], activePlayer.playerId);
+    if (!activePlayer.guestLetters.includes(normalizedLetter)) {
+      keyPressEventLogic(normalizedLetter, activePlayer.Id);
       GameUtils.loadTempMsg(
-        `✨ Random letter "${activePlayer.word[randomIndex]}" is revealed ✨`
+        `✨ Random letter "${normalizedLetter}" is revealed ✨`
       );
       // if it was guessed message appears for 5 sec. declearing that
     } else {
       GameUtils.loadTempMsg(
-        `😥 Random letter "${activePlayer.word[randomIndex]}" is already revealed 😥`
+        `😥 Random letter "${normalizedLetter}" is already revealed 😥`
       );
     }
     activePlayer.isRevealLetter = false;
@@ -409,14 +403,19 @@ function powerRevealLetter() {
 }
 
 function powerRemoveLetter() {
-  const player = activePlayer === p1Stats ? p2Stats : p1Stats;
-  if (player.guestLetters.length > 0) {
+  const targetPlayer = activePlayer === p1Stats ? p2Stats : p1Stats;
+  if (targetPlayer.guestLetters.length > 0) {
     const randomLetterIndex = Math.floor(
-      Math.random() * player.guestLetters.length
+      Math.random() * targetPlayer.guestLetters.length
     );
-    const removedLetter = player.guestLetters
-      .split("")
+    const guestLettersArray = targetPlayer.guestLetters.split("");
+    const removedLetter = guestLettersArray
       .splice(randomLetterIndex, 1)
+      .join("");
+    targetPlayer.guestLetters = guestLettersArray.join("");
+    targetPlayer.wordLeft = targetPlayer.wordLeft
+      .split("")
+      .concat(removedLetter)
       .join("");
     GameUtils.loadTempMsg(`✨ Removed ${removedLetter} ✨`);
     activePlayer.isRemoveLetter = false;
@@ -424,9 +423,17 @@ function powerRemoveLetter() {
     GameUtils.loadTempMsg("⛔ opponent has not guessed any letters yet ⛔");
 }
 
+function powerHideLetters(wordEl) {
+  if (activePlayer === p1Stats) p2Stats.isHideLettersActive = false;
+  else if (activePlayer === p2Stats) p1Stats.isHideLettersActive = false;
+
+  wordEl.textContent = "_".repeat(activePlayer.word.length);
+  GameUtils.loadTempMsg(`✨ Opponent obstructed visibility ✨`);
+}
 // LOG (BUGS)
 // implement music logic (config json file)
 // when using powers game does not end (win state)
+// on of (self) powers will not load win state, even every letter is guessed. Might be because keypressEvent fucntion (happens not during keypress events)
 
 // DONE
 // power free gues (make so when player press revieled letter power stays on)
@@ -440,3 +447,6 @@ function powerRemoveLetter() {
 // implement length check (easy)
 // fix word validation part. prompt message if word is nor correct
 // debug main logic (change)
+
+// added this line (test)
+// targetPlayer.wordLeft.split("").push(removedLetter).join("");
