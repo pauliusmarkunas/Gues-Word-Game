@@ -103,31 +103,34 @@ document.addEventListener("click", async (e) => {
 
   // Free guess
   if (e.target === powers[3]) {
-    powers[3].classList.add("disabled");
-
+    // enables power
     if (activePlayer.isFreeGuess) {
       activePlayer.isFreeGuessActive = true;
-
       activePlayer.isFreeGuess = false;
     }
+    powers[3].classList.add("disabled");
   }
 });
 
 // GAMEPLAY PART
 //
 document.addEventListener("keydown", (e) => {
-  const normalizedKey = e.key.toLocaleUpperCase();
-  if (gameActive && /^[A-Z]$/.test(normalizedKey)) {
+  const normalizedKey = e.key.toUpperCase();
+  if (gameActive === true && /^[A-Z]$/.test(normalizedKey)) {
     gameActive = false;
     // check if letter already guessed
     if (activePlayer.guestLetters.includes(normalizedKey)) {
       GameUtils.loadTempMsg("This Letter is already guessed");
+      gameActive = true;
+      return;
     } else {
       activePlayer.addGuestLetter(normalizedKey);
       activePlayer.updateGuessedLetters();
 
       // correct guess logic (not guessed yet)
       if (activePlayer.word.includes(normalizedKey)) {
+        // power free guess activation
+        powerFreeGuess(true, "✨Free Guess, correct though... ✨");
         GameUtils.playFx("correct-letter");
         activePlayer.wordLeft = activePlayer.wordLeft.replaceAll(
           normalizedKey,
@@ -139,6 +142,10 @@ document.addEventListener("keydown", (e) => {
       }
       // incorrect letter (not guessed yet)
       else {
+        powerFreeGuess(
+          false,
+          "✨Free Guess, wrong, but no damage was done! ✨"
+        );
         activePlayer.heartCount--;
         GameUtils.playFx("incorect-letter");
         activePlayer.updateHearts();
@@ -357,23 +364,37 @@ function powerRevealLetter() {
     const normalizedLetter = activePlayer.word[randomIndex].toUpperCase();
     console.log(normalizedLetter);
 
-    // if random letter was not guest yet
-    if (!activePlayer.guestLetters.includes(normalizedLetter)) {
-      activePlayer.wordLeft = activePlayer.wordLeft.replaceAll(
-        normalizedLetter,
-        ""
-      );
-      keyPressEventLogic(normalizedLetter, activePlayer.Id);
-      GameUtils.loadTempMsg(
-        `✨ Random letter "${normalizedLetter}" is revealed ✨`
-      );
-      // if it was guessed message appears for 5 sec. declearing that
-    } else {
+    // if it was guessed message appears for 5 sec. declearing that
+    if (activePlayer.guestLetters.includes(normalizedLetter)) {
       GameUtils.loadTempMsg(
         `😥 Random letter "${normalizedLetter}" is already revealed 😥`
       );
     }
+    // if random letter was not guest yet (added)
+    else {
+      activePlayer.wordLeft = activePlayer.wordLeft.replaceAll(
+        normalizedLetter,
+        ""
+      );
+      activePlayer.addGuestLetter(normalizedLetter);
+      activePlayer.updateGuessedLetters();
+      loadWordAndDescription();
+      GameUtils.playFx("correct-letter");
+      GameUtils.loadTempMsg(
+        `✨ Random letter "${normalizedLetter}" is revealed ✨`
+      );
+      if (activePlayer.wordLeft === "")
+        loadWinState(`🎉 Player ${activePlayer.id} Wins! 🎉`);
+    }
     activePlayer.isRevealLetter = false;
+  }
+}
+
+function powerFreeGuess(isGuessCorrect, msg) {
+  if (activePlayer.isFreeGuessActive) {
+    GameUtils.loadTempMsg(msg, 5);
+    !isGuessCorrect ? ++activePlayer.heartCount : null;
+    activePlayer.isFreeGuessActive = false;
   }
 }
 
@@ -426,59 +447,3 @@ function powerHideLetters(wordEl) {
 // TASKS:
 // COMPLETE KEYDOWN LOGIC (first without functions)
 // debug, add powers, delete old functions
-
-// DELETE FUNCTION BELOW AFTER PUSHING ALL LOGIC TO KEYDOWN EVENT
-// function keyPressEventLogic(pressedKey, playerId) {
-//   // checking if press event is valid
-//   if (
-//     !activePlayer.guestLetters.includes(pressedKey.toUpperCase()) &&
-//     /^[a-zA-Z]$/.test(pressedKey)
-//   ) {
-//     // normalized letter, convertion to uppercase
-//     const normalizedKey = pressedKey.toLocaleUpperCase();
-//     activePlayer.addGuestLetter(normalizedKey);
-//     activePlayer.updateGuessedLetters();
-
-//     // catch if letter is not part of word, one heart is removed
-//     if (!activePlayer.word.includes(normalizedKey)) {
-//       activePlayer.heartCount--;
-//       GameUtils.playFx("incorect-letter");
-//       if (activePlayer.isFreeGuessActive) {
-//         // compensation
-//         activePlayer.heartCount++;
-//         GameUtils.loadTempMsg(` ✨Free Guess was activated! ✨`, 5);
-//         activePlayer.isFreeGuessActive = false;
-//       }
-//       activePlayer.updateHearts();
-//       if (activePlayer.heartCount <= 0) {
-//         loadLoseState(
-//           `❤️No more guesses, player ${playerId} lost the game❤️`,
-//           timer
-//         );
-//       }
-//       return;
-//     }
-//     // else part. Guessed letters are revieled in the game
-//     GameUtils.playFx("correct-letter");
-//     if (activePlayer.isFreeGuessActive) {
-//       GameUtils.loadTempMsg(` ✨Free Guess was activated! ✨`, 5);
-//       activePlayer.isFreeGuessActive = false;
-//     }
-//     const hiddenWordEl = document.querySelector("#word-display");
-//     const hiddenWord = hiddenWordEl.textContent;
-//     let hiddenWordArr = hiddenWord.split("");
-//     for (let i = 0; i < activePlayer.word.length; i++) {
-//       if (activePlayer.word[i] === normalizedKey) {
-//         hiddenWordArr[i] = normalizedKey;
-//       }
-//     }
-//     hiddenWordEl.textContent = hiddenWordArr.join("");
-//     activePlayer.wordLeft = activePlayer.wordLeft.replaceAll(normalizedKey, "");
-//     console.log(activePlayer.wordLeft);
-//     if (activePlayer.wordLeft === "")
-//       loadWinState(`🎉 Player ${playerId} Wins! 🎉`);
-//   }
-//   activePlayer.updateHearts();
-//   console.log(activePlayer);
-// }
-// DELETE FUNCTION ABOVE AFTER CHANGE
