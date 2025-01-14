@@ -49,10 +49,9 @@ document.addEventListener("input", (e) => {
 
 document.addEventListener("click", async (e) => {
   const startGameBtn = document.querySelector("#start-game");
-  assignWordsToObject();
 
   if (e.target === startGameBtn) {
-    console.log(level);
+    assignWordsToObject();
     const validateWords = await validateWord();
     if (validateWords === true) {
       p1Stats.color = document.getElementById("player1Color").value;
@@ -62,7 +61,6 @@ document.addEventListener("click", async (e) => {
       GameUtils.playAudio(true, "game42-music");
       p1Stats.description = description.description1;
       p2Stats.description = description.description2;
-      console.log(p1Stats, p2Stats);
       GameUtils.changeScreen("#loading", "#game-area");
 
       loadPlayer(activePlayer);
@@ -72,6 +70,7 @@ document.addEventListener("click", async (e) => {
       gameActive = true;
     } else {
       GameUtils.loadTempMsg(validateWords);
+      GameUtils.playFx("error");
     }
   }
 
@@ -87,18 +86,21 @@ document.addEventListener("click", async (e) => {
     powers[0].classList.add("disabled");
     activePlayer.isHideLettersActive = true;
     activePlayer.isHideLetters = false;
+    GameUtils.playFx("superpower");
   }
 
   // Remove Letter
   if (e.target === powers[1]) {
     powers[1].classList.add("disabled");
     powerRemoveLetter(activePlayer);
+    GameUtils.playFx("superpower");
   }
 
   // Reveal Letter
   if (e.target === powers[2]) {
     powers[2].classList.add("disabled");
     powerRevealLetter();
+    GameUtils.playFx("superpower");
   }
 
   // Free guess
@@ -107,6 +109,7 @@ document.addEventListener("click", async (e) => {
     if (activePlayer.isFreeGuess) {
       activePlayer.isFreeGuessActive = true;
       activePlayer.isFreeGuess = false;
+      GameUtils.playFx("superpower");
     }
     powers[3].classList.add("disabled");
   }
@@ -121,6 +124,7 @@ document.addEventListener("keydown", (e) => {
     // check if letter already guessed
     if (activePlayer.guestLetters.includes(normalizedKey)) {
       GameUtils.loadTempMsg("This Letter is already guessed");
+      GameUtils.playFx("error");
       gameActive = true;
       return;
     } else {
@@ -178,7 +182,6 @@ document.addEventListener("keydown", (e) => {
       }, 2000);
     }
   }
-  console.log(activePlayer);
 });
 
 // MAIN GAME FUCNTION
@@ -362,7 +365,6 @@ function powerRevealLetter() {
     // Generates random index for which letter should be revieled
     const randomIndex = Math.floor(Math.random() * activePlayer.word.length);
     const normalizedLetter = activePlayer.word[randomIndex].toUpperCase();
-    console.log(normalizedLetter);
 
     // if it was guessed message appears for 5 sec. declearing that
     if (activePlayer.guestLetters.includes(normalizedLetter)) {
@@ -413,10 +415,15 @@ function powerRemoveLetter() {
       .split("")
       .concat(removedLetter)
       .join("");
-    GameUtils.loadTempMsg(`✨ Removed ${removedLetter} ✨`);
-    activePlayer.isRemoveLetter = false;
-  } else
-    GameUtils.loadTempMsg("⛔ opponent has not guessed any letters yet ⛔");
+    GameUtils.loadTempMsg(
+      `✨ Removed one random letter from opponents guesses ✨`
+    );
+  } else {
+    GameUtils.loadTempMsg(
+      "⛔ opponent has not guessed any letters yet, you wasted your power ⛔"
+    );
+  }
+  activePlayer.isRemoveLetter = false;
 }
 
 function powerHideLetters(wordEl) {
@@ -426,24 +433,6 @@ function powerHideLetters(wordEl) {
   wordEl.textContent = "_".repeat(activePlayer.word.length);
   GameUtils.loadTempMsg(`✨ Opponent obstructed visibility ✨`);
 }
-// LOG (BUGS)
-// implement music logic (config json file)
-// when using powers game does not end (win state)
-// on of (self) powers will not load win state, even every letter is guessed. Might be because keypressEvent fucntion (happens not during keypress events)
-
-// DONE
-// power free gues (make so when player press revieled letter power stays on)
-// develop powers (3left, one for singleplayer also)
-// separate turns (change background color)
-// fix gameover and game win states (also disable interaction after)
-// add input event in setup to track how many letters left to add for player
-// cehck if letter is guest first (if letter is already guest it should load a message)
-// Bug (player change does not work as intended).
-// loadWordAndDescription so it could be used for changing active player(word generation)
-// implement length check (easy)
-// fix word validation part. prompt message if word is nor correct
-// debug main logic (change)
-
-// TASKS:
-// COMPLETE KEYDOWN LOGIC (first without functions)
-// debug, add powers, delete old functions
+// LOG
+// test
+// load page with correct audio status icon

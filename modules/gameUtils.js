@@ -105,7 +105,3 @@ export function playFx(fxName) {
   audioFx.src = `../assets/audio/${fxName}.mp3`;
   audioStatus ? audioFx.play() : audioFx.pause();
 }
-
-// update letters could be optimized easy if I only append letter, and when new game starts, only then I could remove all guessed letters
-
-// log after refracturing

@@ -38,7 +38,6 @@ window.addEventListener("load", async () => {
   GameUtils.playAudio(true, musicNames[level]);
   playerStats.word = wordAndDescription.word.toUpperCase();
   playerStats.wordLeft = wordAndDescription.word.toUpperCase();
-  console.log(wordAndDescription);
 
   playerStats.updateTime();
   playerStats.updateHearts();
