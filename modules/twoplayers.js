@@ -114,35 +114,64 @@ document.addEventListener("click", async (e) => {
 });
 
 // GAMEPLAY PART
+//
 document.addEventListener("keydown", (e) => {
-  if (gameActive) {
-    if (!activePlayer.guestLetters.includes(e.key.toUpperCase())) {
-      gameActive = false;
-      keyPressEventLogic(e.key, activePlayer.id);
-      clearInterval(timer);
+  const normalizedKey = e.key.toLocaleUpperCase();
+  if (gameActive && /^[A-Z]$/.test(normalizedKey)) {
+    gameActive = false;
+    // check if letter already guessed
+    if (activePlayer.guestLetters.includes(normalizedKey)) {
+      GameUtils.loadTempMsg("This Letter is already guessed");
+    } else {
+      activePlayer.addGuestLetter(normalizedKey);
+      activePlayer.updateGuessedLetters();
 
-      if (!gameOver) {
-        activePlayerEl.textContent = `Player ${
-          activePlayer === p1Stats ? "1" : "2"
-        } has made their epic move!`;
-
-        setTimeout(() => {
-          if (activePlayer === p1Stats) {
-            activePlayer = p2Stats;
-          } else {
-            activePlayer = p1Stats;
-          }
-
-          activePlayerEl.textContent = `It's the ${
-            activePlayer === p1Stats ? "1st" : "2nd"
-          } player's turn`;
-
-          loadPlayer(activePlayer);
-          gameActive = true;
-        }, 2000);
+      // correct guess logic (not guessed yet)
+      if (activePlayer.word.includes(normalizedKey)) {
+        GameUtils.playFx("correct-letter");
+        activePlayer.wordLeft = activePlayer.wordLeft.replaceAll(
+          normalizedKey,
+          ""
+        );
+        loadWordAndDescription();
+        if (activePlayer.wordLeft === "")
+          loadWinState(`🎉 Player ${activePlayer.id} Wins! 🎉`);
       }
-    } else GameUtils.loadTempMsg("This Letter is already guest");
+      // incorrect letter (not guessed yet)
+      else {
+        activePlayer.heartCount--;
+        GameUtils.playFx("incorect-letter");
+        activePlayer.updateHearts();
+        if (activePlayer.heartCount <= 0)
+          loadLoseState(
+            `❤️No more guesses, player ${
+              activePlayer === p1Stats ? "2" : "1"
+            } lost the game❤️`,
+            timer
+          );
+      }
+    }
+
+    // active player timer stops and transition is prepared
+    clearInterval(timer);
+    if (!gameOver) {
+      activePlayerEl.textContent = `Player ${
+        activePlayer === p1Stats ? "1" : "2"
+      } has made their epic move!`;
+
+      setTimeout(() => {
+        activePlayer = activePlayer === p1Stats ? p2Stats : p1Stats;
+
+        activePlayerEl.textContent = `It's the ${
+          activePlayer === p1Stats ? "1st" : "2nd"
+        } player's turn`;
+
+        loadPlayer(activePlayer);
+        gameActive = true;
+      }, 2000);
+    }
   }
+  console.log(activePlayer);
 });
 
 // MAIN GAME FUCNTION
@@ -153,23 +182,21 @@ function loadPlayer() {
     "important"
   );
 
-  !activePlayer.isRemoveLetter
-    ? powers[0].classList.add("disabled")
-    : powers[0].classList.remove("disabled");
-  !activePlayer.isHideLetters
-    ? powers[1].classList.add("disabled")
-    : powers[1].classList.remove("disabled");
-  !activePlayer.isRevealLetter
-    ? powers[2].classList.add("disabled")
-    : powers[2].classList.remove("disabled");
-  !activePlayer.isFreeGuess
-    ? powers[3].classList.add("disabled")
-    : powers[3].classList.remove("disabled");
+  // disabling power if they are used
+  const powerStates = [
+    activePlayer.isRemoveLetter,
+    activePlayer.isHideLetters,
+    activePlayer.isRevealLetter,
+    activePlayer.isFreeGuess,
+  ];
+  powers.forEach((power, i) => {
+    power.classList.toggle("disabled", !powerStates[i]);
+  });
 
   activePlayer.updateTime();
   activePlayer.updateHearts();
   activePlayer.updateGuessedLetters();
-  loadWordAndDescription(activePlayer);
+  loadWordAndDescription();
 
   timer = setInterval(() => {
     if (activePlayer.time > 0) {
@@ -223,15 +250,13 @@ async function generateDescriptions() {
 }
 
 function assignWordsToObject() {
-  const p1Input = document.querySelector("#player1-word");
-  const p2Input = document.querySelector("#player2-word");
-  let word4player1 = p2Input.value.toUpperCase();
-  let word4player2 = p1Input.value.toUpperCase();
+  const p1Input = document.querySelector("#player1-word").value.toUpperCase();
+  const p2Input = document.querySelector("#player2-word").value.toUpperCase();
 
-  p1Stats.word = word4player1;
-  p2Stats.word = word4player2;
-  p1Stats.wordLeft = word4player1;
-  p2Stats.wordLeft = word4player2;
+  p1Stats.word = p2Input;
+  p2Stats.word = p1Input;
+  p1Stats.wordLeft = p2Input;
+  p2Stats.wordLeft = p1Input;
 }
 
 // I think the issue is what fetch automatically trows error, when it fails to fetch data. I need to manage those cases.
@@ -276,7 +301,7 @@ async function validateWord() {
   }
 }
 
-function loadWordAndDescription(activePlayer) {
+function loadWordAndDescription() {
   const word = document.getElementById("word-display");
   const description = document.getElementById("description");
   const templateArr = [];
@@ -289,60 +314,6 @@ function loadWordAndDescription(activePlayer) {
     powerHideLetters(word);
   else word.textContent = templateArr.join("");
   description.textContent = activePlayer.description;
-}
-
-function keyPressEventLogic(pressedKey, playerId) {
-  // checking if press event is valid
-  if (
-    !activePlayer.guestLetters.includes(pressedKey.toUpperCase()) &&
-    /^[a-zA-Z]$/.test(pressedKey)
-  ) {
-    // normalized letter, convertion to uppercase
-    const normalizedKey = pressedKey.toLocaleUpperCase();
-    activePlayer.addGuestLetter(normalizedKey);
-    activePlayer.updateGuessedLetters();
-
-    // catch if letter is not part of word, one heart is removed
-    if (!activePlayer.word.includes(normalizedKey)) {
-      activePlayer.heartCount--;
-      GameUtils.playFx("incorect-letter");
-      if (activePlayer.isFreeGuessActive) {
-        // compensation
-        activePlayer.heartCount++;
-        GameUtils.loadTempMsg(` ✨Free Guess was activated! ✨`, 5);
-        activePlayer.isFreeGuessActive = false;
-      }
-      activePlayer.updateHearts();
-      if (activePlayer.heartCount <= 0) {
-        loadLoseState(
-          `❤️No more guesses, player ${playerId} lost the game❤️`,
-          timer
-        );
-      }
-      return;
-    }
-
-    // else part. Guessed letters are revieled in the game
-    GameUtils.playFx("correct-letter");
-    if (activePlayer.isFreeGuessActive) {
-      GameUtils.loadTempMsg(` ✨Free Guess was activated! ✨`, 5);
-      activePlayer.isFreeGuessActive = false;
-    }
-    const hiddenWordEl = document.querySelector("#word-display");
-    const hiddenWord = hiddenWordEl.textContent;
-    let hiddenWordArr = hiddenWord.split("");
-    for (let i = 0; i < activePlayer.word.length; i++) {
-      if (activePlayer.word[i] === normalizedKey) {
-        hiddenWordArr[i] = normalizedKey;
-      }
-    }
-    hiddenWordEl.textContent = hiddenWordArr.join("");
-    activePlayer.wordLeft = activePlayer.wordLeft.replaceAll(normalizedKey, "");
-    console.log(activePlayer.wordsLeft);
-    if (activePlayer.wordLeft === "")
-      loadWinState(`🎉 Player ${playerId} Wins! 🎉`);
-  }
-  activePlayer.updateHearts();
 }
 
 // HELPER FUNCTIONS
@@ -388,6 +359,10 @@ function powerRevealLetter() {
 
     // if random letter was not guest yet
     if (!activePlayer.guestLetters.includes(normalizedLetter)) {
+      activePlayer.wordLeft = activePlayer.wordLeft.replaceAll(
+        normalizedLetter,
+        ""
+      );
       keyPressEventLogic(normalizedLetter, activePlayer.Id);
       GameUtils.loadTempMsg(
         `✨ Random letter "${normalizedLetter}" is revealed ✨`
@@ -448,5 +423,62 @@ function powerHideLetters(wordEl) {
 // fix word validation part. prompt message if word is nor correct
 // debug main logic (change)
 
-// added this line (test)
-// targetPlayer.wordLeft.split("").push(removedLetter).join("");
+// TASKS:
+// COMPLETE KEYDOWN LOGIC (first without functions)
+// debug, add powers, delete old functions
+
+// DELETE FUNCTION BELOW AFTER PUSHING ALL LOGIC TO KEYDOWN EVENT
+// function keyPressEventLogic(pressedKey, playerId) {
+//   // checking if press event is valid
+//   if (
+//     !activePlayer.guestLetters.includes(pressedKey.toUpperCase()) &&
+//     /^[a-zA-Z]$/.test(pressedKey)
+//   ) {
+//     // normalized letter, convertion to uppercase
+//     const normalizedKey = pressedKey.toLocaleUpperCase();
+//     activePlayer.addGuestLetter(normalizedKey);
+//     activePlayer.updateGuessedLetters();
+
+//     // catch if letter is not part of word, one heart is removed
+//     if (!activePlayer.word.includes(normalizedKey)) {
+//       activePlayer.heartCount--;
+//       GameUtils.playFx("incorect-letter");
+//       if (activePlayer.isFreeGuessActive) {
+//         // compensation
+//         activePlayer.heartCount++;
+//         GameUtils.loadTempMsg(` ✨Free Guess was activated! ✨`, 5);
+//         activePlayer.isFreeGuessActive = false;
+//       }
+//       activePlayer.updateHearts();
+//       if (activePlayer.heartCount <= 0) {
+//         loadLoseState(
+//           `❤️No more guesses, player ${playerId} lost the game❤️`,
+//           timer
+//         );
+//       }
+//       return;
+//     }
+//     // else part. Guessed letters are revieled in the game
+//     GameUtils.playFx("correct-letter");
+//     if (activePlayer.isFreeGuessActive) {
+//       GameUtils.loadTempMsg(` ✨Free Guess was activated! ✨`, 5);
+//       activePlayer.isFreeGuessActive = false;
+//     }
+//     const hiddenWordEl = document.querySelector("#word-display");
+//     const hiddenWord = hiddenWordEl.textContent;
+//     let hiddenWordArr = hiddenWord.split("");
+//     for (let i = 0; i < activePlayer.word.length; i++) {
+//       if (activePlayer.word[i] === normalizedKey) {
+//         hiddenWordArr[i] = normalizedKey;
+//       }
+//     }
+//     hiddenWordEl.textContent = hiddenWordArr.join("");
+//     activePlayer.wordLeft = activePlayer.wordLeft.replaceAll(normalizedKey, "");
+//     console.log(activePlayer.wordLeft);
+//     if (activePlayer.wordLeft === "")
+//       loadWinState(`🎉 Player ${playerId} Wins! 🎉`);
+//   }
+//   activePlayer.updateHearts();
+//   console.log(activePlayer);
+// }
+// DELETE FUNCTION ABOVE AFTER CHANGE
