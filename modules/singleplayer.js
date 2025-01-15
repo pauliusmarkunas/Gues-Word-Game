@@ -79,7 +79,7 @@ async function generateWord(levelIndex, levelsInfoArr) {
 
   try {
     // Call backend to generate word
-    const response = await fetch("http://localhost:3000/generate-word", {
+    const response = await fetch("https://word-game-serverside.onrender.com/generate-word", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

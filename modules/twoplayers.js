@@ -241,7 +241,7 @@ async function generateDescriptions() {
     20
   );
   try {
-    const response = await fetch("http://localhost:3500/generate-description", {
+    const response = await fetch("https://word-game-serverside.onrender.com/generate-description", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
