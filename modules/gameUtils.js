@@ -110,3 +110,7 @@ export function focusInput() {
   const inputEl = document.querySelector(".hidden-input-for-mobile");
   inputEl.focus();
 }
+
+export function isMobileDevice() {
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}

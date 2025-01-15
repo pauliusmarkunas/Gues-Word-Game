@@ -30,11 +30,40 @@ const playerStats = GameUtils.constructPlayerObject(levelsInfo[level]);
 // for mobile prevent default
 const inputEl = document.querySelector(".hidden-input-for-mobile");
 inputEl.addEventListener("keydown", (e) => {
-  e.preventDefault();
+  if (
+    GameUtils.isMobileDevice() &&
+    !playerStats.guestLetters.includes(e.key.toUpperCase())
+  ) {
+    e.preventDefault();
+    keyPressEventLogic(e.key, playerStats, timer, level, levelsInfo);
+  } else GameUtils.loadTempMsg("This Letter is already guest");
+});
+
+window.addEventListener("load", async () => {
+  const wordAndDescription = await generateWord(level, levelsInfo);
+  GameUtils.playAudio(true, musicNames[level]);
+  playerStats.word = wordAndDescription.word.toUpperCase();
+  playerStats.wordLeft = wordAndDescription.word.toUpperCase();
+
+  playerStats.updateTime();
+  playerStats.updateHearts();
+  playerStats.updateGuessedLetters();
+
+  timer = setInterval(() => {
+    if (playerStats.time > 0) {
+      playerStats.time--;
+      playerStats.updateTime();
+    } else {
+      GameUtils.loadLoseState("⏰ Time's Up! ⏰");
+    }
+  }, 1000);
 });
 
 document.addEventListener("keydown", (e) => {
-  if (!playerStats.guestLetters.includes(e.key.toUpperCase()))
+  if (
+    !GameUtils.isMobileDevice() &&
+    !playerStats.guestLetters.includes(e.key.toUpperCase())
+  )
     keyPressEventLogic(e.key, playerStats, timer, level, levelsInfo);
   else GameUtils.loadTempMsg("This Letter is already guest");
 });
