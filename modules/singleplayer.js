@@ -68,25 +68,25 @@ document.addEventListener("keydown", (e) => {
   else GameUtils.loadTempMsg("This Letter is already guest");
 });
 
-window.addEventListener("load", async () => {
-  const wordAndDescription = await generateWord(level, levelsInfo);
-  GameUtils.playAudio(true, musicNames[level]);
-  playerStats.word = wordAndDescription.word.toUpperCase();
-  playerStats.wordLeft = wordAndDescription.word.toUpperCase();
+// window.addEventListener("load", async () => {
+//   const wordAndDescription = await generateWord(level, levelsInfo);
+//   GameUtils.playAudio(true, musicNames[level]);
+//   playerStats.word = wordAndDescription.word.toUpperCase();
+//   playerStats.wordLeft = wordAndDescription.word.toUpperCase();
 
-  playerStats.updateTime();
-  playerStats.updateHearts();
-  playerStats.updateGuessedLetters();
+//   playerStats.updateTime();
+//   playerStats.updateHearts();
+//   playerStats.updateGuessedLetters();
 
-  timer = setInterval(() => {
-    if (playerStats.time > 0) {
-      playerStats.time--;
-      playerStats.updateTime();
-    } else {
-      GameUtils.loadLoseState("⏰ Time's Up! ⏰");
-    }
-  }, 1000);
-});
+//   timer = setInterval(() => {
+//     if (playerStats.time > 0) {
+//       playerStats.time--;
+//       playerStats.updateTime();
+//     } else {
+//       GameUtils.loadLoseState("⏰ Time's Up! ⏰");
+//     }
+//   }, 1000);
+// });
 
 const tryAgainBtn = document.querySelector("#play-again");
 const nextLevelBtn = document.querySelector("#next-level");
@@ -275,3 +275,7 @@ function powerFreeGuess() {
     playerStats.isFreeGuess = false;
   }
 }
+
+// LOG
+// how to identify mobile (other then userAgent?)
+// how to implement keypress
