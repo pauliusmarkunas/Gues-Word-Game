@@ -27,6 +27,12 @@ let timer;
 const playerStats = GameUtils.constructPlayerObject(levelsInfo[level]);
 
 // EVENT LISTERNERS
+// for mobile prevent default
+const inputEl = document.querySelector(".hidden-input-for-mobile");
+inputEl.addEventListener("keydown", (e) => {
+  e.preventDefault();
+});
+
 document.addEventListener("keydown", (e) => {
   if (!playerStats.guestLetters.includes(e.key.toUpperCase()))
     keyPressEventLogic(e.key, playerStats, timer, level, levelsInfo);

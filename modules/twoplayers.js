@@ -123,6 +123,12 @@ document.addEventListener("click", async (e) => {
     GameUtils.focusInput();
 });
 
+// for mobile prevent default
+const inputEl = document.querySelector(".hidden-input-for-mobile");
+inputEl.addEventListener("keydown", (e) => {
+  e.preventDefault();
+});
+
 // GAMEPLAY PART
 //
 document.addEventListener("keydown", (e) => {
