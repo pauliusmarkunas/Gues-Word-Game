@@ -18,3 +18,10 @@ body {
 #audio-icon {
   caret-color: transparent;
 }
+
+.hidden-input-for-mobile {
+  width: 0;
+  height: 0;
+  position: absolute;
+  opacity: 0;
+}

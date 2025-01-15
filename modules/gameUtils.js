@@ -105,3 +105,8 @@ export function playFx(fxName) {
   audioFx.src = `../assets/audio/${fxName}.mp3`;
   audioStatus ? audioFx.play() : audioFx.pause();
 }
+
+export function focusInput() {
+  const inputEl = document.querySelector(".hidden-input-for-mobile");
+  inputEl.focus();
+}

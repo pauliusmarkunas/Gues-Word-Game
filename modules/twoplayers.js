@@ -113,6 +113,8 @@ document.addEventListener("click", async (e) => {
     }
     powers[3].classList.add("disabled");
   }
+
+  if (e.target === wordEl) GameUtils.focusInput;
 });
 
 // GAMEPLAY PART
