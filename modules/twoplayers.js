@@ -114,7 +114,13 @@ document.addEventListener("click", async (e) => {
     powers[3].classList.add("disabled");
   }
 
-  if (e.target === wordEl) GameUtils.focusInput;
+  const keyboardBtn = document.getElementById("keyboard-container");
+  if (
+    e.target === wordEl ||
+    e.target === keyboardBtn ||
+    e.target === keyboardBtn.firstElementChild
+  )
+    GameUtils.focusInput();
 });
 
 // GAMEPLAY PART

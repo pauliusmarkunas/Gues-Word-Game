@@ -58,7 +58,7 @@ const nextLevelBtn = document.querySelector("#next-level");
 const revealLetterBtn = document.querySelector("#power1");
 const freeGuessBtn = document.querySelector("#power2");
 const wordEl = document.getElementById("word-display");
-const inputEl = document.querySelector(".hidden-input-for-mobile");
+const keyboardBtn = document.getElementById("keyboard-container");
 
 document.addEventListener("click", (e) => {
   if (e.target === tryAgainBtn || e.target === nextLevelBtn) location.reload();
@@ -71,7 +71,12 @@ document.addEventListener("click", (e) => {
     GameUtils.playFx("superpower");
   }
 
-  if (e.target === wordEl) GameUtils.focusInput;
+  if (
+    e.target === wordEl ||
+    e.target === keyboardBtn ||
+    e.target === keyboardBtn.firstElementChild
+  )
+    GameUtils.focusInput();
 });
 
 // HELPER FUNCTIONS -----------------------------------------------
