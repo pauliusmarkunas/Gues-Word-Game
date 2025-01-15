@@ -237,7 +237,7 @@ function loadSetupMessage(player) {
 // Add 3 times retry if !response.ok
 async function generateDescriptions() {
   try {
-    const response = await fetch("http://localhost:3500/generate-description", {
+    const response = await fetch("https://word-game-serverside.onrender.com/generate-description", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
