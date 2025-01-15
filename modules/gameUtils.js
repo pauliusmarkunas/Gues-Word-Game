@@ -17,7 +17,7 @@ document.addEventListener("click", async (e) => {
 export function getLevelsInfo() {
   // seconds, heart count, word difficulty(1-5), length(3-12),
   const levelsInfo = [
-    [1000, 10, 3, 3],
+    [100, 10, 3, 3],
     [90, 9, 3, 4],
     [80, 8, 1, 5],
     [70, 7, 2, 6],

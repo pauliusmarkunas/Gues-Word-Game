@@ -236,6 +236,10 @@ function loadSetupMessage(player) {
 
 // Add 3 times retry if !response.ok
 async function generateDescriptions() {
+  GameUtils.loadTempMsg(
+    "✍ AI is writing creative descriptions for your words, give it a moment ✍",
+    20
+  );
   try {
     const response = await fetch("http://localhost:3500/generate-description", {
       method: "POST",

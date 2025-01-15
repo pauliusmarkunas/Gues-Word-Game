@@ -72,6 +72,10 @@ document.addEventListener("click", (e) => {
 // HELPER FUNCTIONS -----------------------------------------------
 async function generateWord(levelIndex, levelsInfoArr) {
   const selectedLevelStats = levelsInfoArr[levelIndex]; // Get stats for selected level
+  GameUtils.loadTempMsg(
+    "✍ AI is thinking of a creative word and description, give it a moment ✍",
+    20
+  );
 
   try {
     // Call backend to generate word
