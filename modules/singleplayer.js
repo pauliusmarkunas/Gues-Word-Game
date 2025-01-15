@@ -74,20 +74,23 @@ async function generateWord(levelIndex, levelsInfoArr) {
   const selectedLevelStats = levelsInfoArr[levelIndex]; // Get stats for selected level
   GameUtils.loadTempMsg(
     "✍ AI is thinking of a creative word and description, give it a moment ✍",
-    20
+    3
   );
 
   try {
     // Call backend to generate word
-    const response = await fetch("https://word-game-serverside.onrender.com/generate-word", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        levelStats: selectedLevelStats,
-      }),
-    });
+    const response = await fetch(
+      "https://word-game-serverside.onrender.com/generate-word",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          levelStats: selectedLevelStats,
+        }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Error: ${response.statusText}`);

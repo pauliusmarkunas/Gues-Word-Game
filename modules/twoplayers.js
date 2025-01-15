@@ -238,19 +238,22 @@ function loadSetupMessage(player) {
 async function generateDescriptions() {
   GameUtils.loadTempMsg(
     "✍ AI is writing creative descriptions for your words, give it a moment ✍",
-    20
+    5
   );
   try {
-    const response = await fetch("https://word-game-serverside.onrender.com/generate-description", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        word1: p1Stats.word,
-        word2: p2Stats.word,
-      }),
-    });
+    const response = await fetch(
+      "https://word-game-serverside.onrender.com/generate-description",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          word1: p1Stats.word,
+          word2: p2Stats.word,
+        }),
+      }
+    );
     if (!response.ok) {
       throw new Error(`Error: ${response.statusText}`);
     }
