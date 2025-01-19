@@ -128,14 +128,13 @@ document.addEventListener("click", async (e) => {
 const inputEl = document.querySelector(".hidden-input-for-mobile");
 
 inputEl.addEventListener("input", (e) => {
-  e.preventDefault();
   const value = e.target.value;
   inputEl.value = "";
   const normalizedKey = value.toUpperCase();
   if (
     gameActive === true &&
     /^[A-Z]$/.test(normalizedKey) &&
-    isMobileDevice()
+    GameUtils.isMobileDevice()
   ) {
     gameActive = false;
     // check if letter already guessed
@@ -206,7 +205,7 @@ inputEl.addEventListener("input", (e) => {
 document.addEventListener("keydown", (e) => {
   const normalizedKey = e.key.toUpperCase();
   if (
-    !isMobileDevice() &&
+    !GameUtils.isMobileDevice() &&
     gameActive === true &&
     /^[A-Z]$/.test(normalizedKey)
   ) {
