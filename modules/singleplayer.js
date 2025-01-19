@@ -39,7 +39,6 @@ inputEl.addEventListener("input", (e) => {
     // e.preventDefault();
     const value = e.target.value;
     inputEl.value = "";
-    console.log(value);
     keyPressEventLogic(value, playerStats, timer, level, levelsInfo);
   } else GameUtils.loadTempMsg("This Letter is already guest");
 });

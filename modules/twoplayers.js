@@ -125,15 +125,90 @@ document.addEventListener("click", async (e) => {
 
 // for mobile prevent default
 const inputEl = document.querySelector(".hidden-input-for-mobile");
-inputEl.addEventListener("keydown", (e) => {
+
+inputEl.addEventListener("input", (e) => {
   e.preventDefault();
+  const value = e.target.value;
+  inputEl.value = "";
+  const normalizedKey = value.toUpperCase();
+  if (
+    gameActive === true &&
+    /^[A-Z]$/.test(normalizedKey) &&
+    isMobileDevice()
+  ) {
+    gameActive = false;
+    // check if letter already guessed
+    if (activePlayer.guestLetters.includes(normalizedKey)) {
+      GameUtils.loadTempMsg("This Letter is already guessed");
+      GameUtils.playFx("error");
+      gameActive = true;
+      return;
+    } else {
+      activePlayer.addGuestLetter(normalizedKey);
+      activePlayer.updateGuessedLetters();
+
+      // correct guess logic (not guessed yet)
+      if (activePlayer.word.includes(normalizedKey)) {
+        // power free guess activation
+        powerFreeGuess(true, "✨Free Guess, correct though... ✨");
+        GameUtils.playFx("correct-letter");
+        activePlayer.wordLeft = activePlayer.wordLeft.replaceAll(
+          normalizedKey,
+          ""
+        );
+        loadWordAndDescription();
+        if (activePlayer.wordLeft === "")
+          loadWinState(`🎉 Player ${activePlayer.id} Wins! 🎉`);
+      }
+      // incorrect letter (not guessed yet)
+      else {
+        powerFreeGuess(
+          false,
+          "✨Free Guess, wrong, but no damage was done! ✨"
+        );
+        activePlayer.heartCount--;
+        GameUtils.playFx("incorect-letter");
+        activePlayer.updateHearts();
+        if (activePlayer.heartCount <= 0)
+          loadLoseState(
+            `❤️No more guesses, player ${
+              activePlayer === p1Stats ? "2" : "1"
+            } lost the game❤️`,
+            timer
+          );
+      }
+    }
+
+    // active player timer stops and transition is prepared
+    clearInterval(timer);
+    if (!gameOver) {
+      activePlayerEl.textContent = `Player ${
+        activePlayer === p1Stats ? "1" : "2"
+      } has made their epic move!`;
+
+      setTimeout(() => {
+        activePlayer = activePlayer === p1Stats ? p2Stats : p1Stats;
+
+        activePlayerEl.textContent = `It's the ${
+          activePlayer === p1Stats ? "1st" : "2nd"
+        } player's turn`;
+
+        loadPlayer(activePlayer);
+        gameActive = true;
+      }, 2000);
+    }
+  }
 });
 
 // GAMEPLAY PART
 //
 document.addEventListener("keydown", (e) => {
   const normalizedKey = e.key.toUpperCase();
-  if (gameActive === true && /^[A-Z]$/.test(normalizedKey)) {
+  if (
+    !isMobileDevice() &&
+    gameActive === true &&
+    /^[A-Z]$/.test(normalizedKey)
+  ) {
     gameActive = false;
     // check if letter already guessed
     if (activePlayer.guestLetters.includes(normalizedKey)) {
