@@ -115,6 +115,7 @@ document.addEventListener("click", async (e) => {
   }
 
   const keyboardBtn = document.getElementById("keyboard-container");
+  const wordEl = document.getElementById("word-display");
   if (
     e.target === wordEl ||
     e.target === keyboardBtn ||
