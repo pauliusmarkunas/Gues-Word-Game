@@ -114,3 +114,13 @@ export function focusInput() {
 export function isMobileDevice() {
   return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
+
+export function checkIfMobile() {
+  const inputEl = document.querySelector(".hidden-input-for-mobile");
+  const keyboardBtn = document.getElementById("keyboard-container");
+
+  if (!isMobileDevice()) {
+    inputEl.style.display = "none";
+    keyboardBtn.style.display = "none";
+  }
+}

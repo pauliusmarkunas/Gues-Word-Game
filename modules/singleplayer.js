@@ -26,16 +26,21 @@ let timer;
 // object which will be dynamoically changed during game
 const playerStats = GameUtils.constructPlayerObject(levelsInfo[level]);
 
+GameUtils.checkIfMobile();
+
 // EVENT LISTERNERS
 // for mobile prevent default
 const inputEl = document.querySelector(".hidden-input-for-mobile");
-inputEl.addEventListener("keydown", (e) => {
+inputEl.addEventListener("input", (e) => {
   if (
     GameUtils.isMobileDevice() &&
-    !playerStats.guestLetters.includes(e.key.toUpperCase())
+    !playerStats.guestLetters.includes(e.target.value.toUpperCase())
   ) {
-    e.preventDefault();
-    keyPressEventLogic(e.key, playerStats, timer, level, levelsInfo);
+    // e.preventDefault();
+    const value = e.target.value;
+    inputEl.value = "";
+    console.log(value);
+    keyPressEventLogic(value, playerStats, timer, level, levelsInfo);
   } else GameUtils.loadTempMsg("This Letter is already guest");
 });
 
@@ -279,3 +284,5 @@ function powerFreeGuess() {
 // LOG
 // how to identify mobile (other then userAgent?)
 // how to implement keypress
+// load correct word on lose state
+// remove back to menu
